@@ -293,8 +293,8 @@ async def chat(request: ChatRequest):
                 {"role": "user", "content": f"User asked: {request.message}\n\nSearch context: {context}\n\nProvide a natural response."}
             ]
             
-            response = await openrouter_client.chat.completions.create(
-                model="anthropic/claude-3.5-sonnet",
+            response = cerebras_client.chat.completions.create(
+                model="llama3.1-8b",
                 messages=messages,
                 max_tokens=500,
                 temperature=0.7
