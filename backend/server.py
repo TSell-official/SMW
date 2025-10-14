@@ -83,6 +83,42 @@ async def startup_event():
     faiss_index = faiss.IndexFlatL2(384)
     logging.info("Models loaded successfully")
 
+# Helper function to search Wikipedia
+def search_wikipedia(query: str, limit: int = 5):
+    params = {
+        "action": "opensearch",
+        "search": query,
+        "limit": limit,
+        "namespace": 0,
+        "format": "json"
+    }
+    headers = {"User-Agent": WIKI_USER_AGENT}
+    response = requests.get(WIKI_API_URL, params=params, headers=headers)
+    data = response.json()
+    return list(zip(data[1], data[2], data[3]))  # titles, descriptions, urls
+
+# Helper function to get Wikipedia page
+def get_wikipedia_page(title: str):
+    params = {
+        "action": "query",
+        "titles": title,
+        "prop": "extracts|categories|info",
+        "exintro": False,
+        "explaintext": True,
+        "inprop": "url",
+        "format": "json"
+    }
+    headers = {"User-Agent": WIKI_USER_AGENT}
+    response = requests.get(WIKI_API_URL, params=params, headers=headers)
+    data = response.json()
+    pages = data["query"]["pages"]
+    page_id = list(pages.keys())[0]
+    
+    if page_id == "-1":
+        return None
+    
+    return pages[page_id]
+
 # Smart search endpoint using Cerebras
 @api_router.post("/search", response_model=List[SearchResult])
 async def smart_search(request: SearchRequest):
@@ -107,17 +143,15 @@ async def smart_search(request: SearchRequest):
         optimized_query = cerebras_response.choices[0].message.content.strip()
         
         # Search Wikipedia
-        search_results = wiki_wiki.search(optimized_query, results=5)
+        search_results = search_wikipedia(optimized_query, limit=5)
         
         results = []
-        for title in search_results:
-            page = wiki_wiki.page(title)
-            if page.exists():
-                results.append(SearchResult(
-                    title=page.title,
-                    summary=page.summary[:300] + "..." if len(page.summary) > 300 else page.summary,
-                    url=page.fullurl
-                ))
+        for title, description, url in search_results:
+            results.append(SearchResult(
+                title=title,
+                summary=description if description else "No description available",
+                url=url
+            ))
         
         return results
     
