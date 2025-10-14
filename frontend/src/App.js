@@ -102,25 +102,73 @@ function App() {
           const gerchMessage = {
             role: "gerch",
             content: text,
-            data: data,
             timestamp: new Date()
           };
           setMessages((prev) => [...prev, gerchMessage]);
           setTypingText("");
-          setIsTyping(false);
-          setIsSpinning(false);
+          
+          // Add follow-up question if images or articles are available
+          const hasImages = data.images && data.images.length > 0;
+          const hasLinks = data.web_results && data.web_results.length > 0;
+          
+          if (hasImages || hasLinks) {
+            setTimeout(() => {
+              let followUp = "Would you like me to show you ";
+              const options = [];
+              if (hasImages) options.push("images");
+              if (hasLinks) options.push("relevant articles");
+              followUp += options.join(" or ") + "?";
+              
+              const followUpMessage = {
+                role: "gerch",
+                content: followUp,
+                data: data,
+                timestamp: new Date()
+              };
+              setMessages((prev) => [...prev, followUpMessage]);
+              setIsTyping(false);
+              setIsSpinning(false);
+            }, 500);
+          } else {
+            setIsTyping(false);
+            setIsSpinning(false);
+          }
         });
       } else {
         // Instant display for long responses
         const gerchMessage = {
           role: "gerch",
           content: text,
-          data: data,
           timestamp: new Date()
         };
         setMessages((prev) => [...prev, gerchMessage]);
-        setIsTyping(false);
-        setIsSpinning(false);
+        
+        // Add follow-up question if images or articles are available
+        const hasImages = data.images && data.images.length > 0;
+        const hasLinks = data.web_results && data.web_results.length > 0;
+        
+        if (hasImages || hasLinks) {
+          setTimeout(() => {
+            let followUp = "Would you like me to show you ";
+            const options = [];
+            if (hasImages) options.push("images");
+            if (hasLinks) options.push("relevant articles");
+            followUp += options.join(" or ") + "?";
+            
+            const followUpMessage = {
+              role: "gerch",
+              content: followUp,
+              data: data,
+              timestamp: new Date()
+            };
+            setMessages((prev) => [...prev, followUpMessage]);
+            setIsTyping(false);
+            setIsSpinning(false);
+          }, 500);
+        } else {
+          setIsTyping(false);
+          setIsSpinning(false);
+        }
       }
     } catch (error) {
       console.error('Search error:', error);
