@@ -163,13 +163,17 @@ async def smart_search(request: SearchRequest):
 @api_router.get("/article/{title}", response_model=ArticleResponse)
 async def get_article(title: str):
     try:
-        page = wiki_wiki.page(title)
+        page_data = get_wikipedia_page(title)
         
-        if not page.exists():
+        if not page_data:
             raise HTTPException(status_code=404, detail="Article not found")
         
         # Get categories
-        categories = list(page.categories.keys())[:5]
+        categories = []
+        if "categories" in page_data:
+            categories = [cat["title"].replace("Category:", "") for cat in page_data.get("categories", [])[:5]]
+        
+        content = page_data.get("extract", "")
         
         # Generate AI summary
         cerebras_response = cerebras_client.chat.completions.create(
@@ -180,7 +184,7 @@ async def get_article(title: str):
                 },
                 {
                     "role": "user",
-                    "content": f"Summarize this article: {page.summary[:1000]}"
+                    "content": f"Summarize this article: {content[:1000]}"
                 }
             ],
             model="llama3.1-8b",
@@ -191,9 +195,9 @@ async def get_article(title: str):
         ai_summary = cerebras_response.choices[0].message.content.strip()
         
         return ArticleResponse(
-            title=page.title,
-            content=page.text,
-            url=page.fullurl,
+            title=page_data.get("title", title),
+            content=content,
+            url=page_data.get("fullurl", f"https://en.wikipedia.org/wiki/{title}"),
             categories=categories,
             summary=ai_summary
         )
