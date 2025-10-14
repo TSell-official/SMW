@@ -23,11 +23,8 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# OpenRouter client (using OpenAI SDK with custom base URL)
-openrouter_client = AsyncOpenAI(
-    api_key=os.environ.get('OPENROUTER_API_KEY'),
-    base_url="https://openrouter.ai/api/v1"
-)
+# Cerebras client
+cerebras_client = Cerebras(api_key=os.environ.get('CEREBRAS_API_KEY'))
 
 # API Keys
 SERPAPI_KEY = os.environ.get('SERPAPI_KEY')
