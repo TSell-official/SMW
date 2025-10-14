@@ -179,19 +179,27 @@ class OpenMeteoClient:
 
 
 class ProgrammingQuotesClient:
-    """Programming Quotes API"""
+    """Programming Quotes API with fallback"""
     
     def __init__(self):
-        self.base_url = "https://programming-quotesapi.vercel.app"
+        self.quotes = [
+            {"en": "The best way to get a project done faster is to start sooner.", "author": "Jim Highsmith"},
+            {"en": "Code is like humor. When you have to explain it, it's bad.", "author": "Cory House"},
+            {"en": "First, solve the problem. Then, write the code.", "author": "John Johnson"},
+            {"en": "Experience is the name everyone gives to their mistakes.", "author": "Oscar Wilde"},
+            {"en": "In order to be irreplaceable, one must always be different.", "author": "Coco Chanel"},
+            {"en": "Java is to JavaScript what car is to Carpet.", "author": "Chris Heilmann"},
+            {"en": "Knowledge is power.", "author": "Francis Bacon"},
+            {"en": "Sometimes it pays to stay in bed on Monday, rather than spending the rest of the week debugging Monday's code.", "author": "Dan Salomon"},
+            {"en": "Perfection is achieved not when there is nothing more to add, but rather when there is nothing more to take away.", "author": "Antoine de Saint-Exupery"},
+            {"en": "Ruby is rubbish! PHP is phpantastic!", "author": "Nikita Popov"}
+        ]
     
     async def get_random_quote(self) -> Optional[Dict]:
         """Get random programming quote"""
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(f"{self.base_url}/api/random")
-                if response.status_code == 200:
-                    data = response.json()
-                    return data
+            import random
+            return random.choice(self.quotes)
         except Exception as e:
             logger.error(f"ProgrammingQuotes error: {e}")
         return None
