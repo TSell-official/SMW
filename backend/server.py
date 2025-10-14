@@ -564,6 +564,133 @@ async def generate_conversational_response(message: str, history: List[Dict[str,
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
+        # Check all new API handlers first
+        pollinations_result = await handle_pollinations_query(request.message)
+        if pollinations_result:
+            return ChatResponse(
+                response=f"Here's your image: {pollinations_result['prompt']}",
+                needs_search=True,
+                search_data=SearchResponse(
+                    query=request.message,
+                    images=[ImageResult(url=pollinations_result['image_url'], thumbnail=pollinations_result['image_url'], width=512, height=512)],
+                    web_results=[]
+                )
+            )
+        
+        crypto_result = await handle_crypto_query(request.message)
+        if crypto_result:
+            response_text = "**Cryptocurrency Prices:**\n\n"
+            for coin, data in crypto_result['data'].items():
+                price = data.get('usd', 0)
+                change = data.get('usd_24h_change', 0)
+                response_text += f"**{coin.capitalize()}**: ${price:,.2f} ({change:+.2f}%)\n"
+            
+            return ChatResponse(response=response_text, needs_search=False)
+        
+        arxiv_result = await handle_arxiv_query(request.message)
+        if arxiv_result:
+            response_text = "**Research Papers:**\n\n"
+            for i, paper in enumerate(arxiv_result['papers'][:3], 1):
+                response_text += f"**{i}. {paper['title']}**\n"
+                response_text += f"{paper['summary'][:200]}...\n"
+                response_text += f"[Read more]({paper['id']})\n\n"
+            
+            return ChatResponse(response=response_text, needs_search=False)
+        
+        stackoverflow_result = await handle_stackoverflow_query(request.message)
+        if stackoverflow_result:
+            response_text = "**Programming Questions:**\n\n"
+            for i, q in enumerate(stackoverflow_result['questions'][:3], 1):
+                response_text += f"**{i}. {q.get('title', 'No title')}**\n"
+                response_text += f"Score: {q.get('score', 0)} | Answers: {q.get('answer_count', 0)}\n"
+                response_text += f"[View question]({q.get('link', '#')})\n\n"
+            
+            return ChatResponse(response=response_text, needs_search=False)
+        
+        weather_result = await handle_weather_query(request.message)
+        if weather_result:
+            weather = weather_result['data']
+            temp = weather.get('temperature', 0)
+            windspeed = weather.get('windspeed', 0)
+            location = weather_result['location']
+            
+            response_text = f"**Weather in {location}**\n\n"
+            response_text += f"Temperature: {temp}°C\n"
+            response_text += f"Wind Speed: {windspeed} km/h\n"
+            
+            return ChatResponse(response=response_text, needs_search=False)
+        
+        pokemon_result = await handle_pokemon_query(request.message)
+        if pokemon_result:
+            pokemon = pokemon_result['data']
+            name = pokemon['name'].capitalize()
+            height = pokemon['height'] / 10
+            weight = pokemon['weight'] / 10
+            types = ', '.join([t['type']['name'] for t in pokemon['types']])
+            
+            response_text = f"**{name}**\n\n"
+            response_text += f"Height: {height}m | Weight: {weight}kg\n"
+            response_text += f"Types: {types}\n"
+            
+            # Include sprite image
+            sprite_url = pokemon['sprites']['front_default']
+            if sprite_url:
+                return ChatResponse(
+                    response=response_text,
+                    needs_search=True,
+                    search_data=SearchResponse(
+                        query=request.message,
+                        images=[ImageResult(url=sprite_url, thumbnail=sprite_url, width=96, height=96)],
+                        web_results=[]
+                    )
+                )
+            
+            return ChatResponse(response=response_text, needs_search=False)
+        
+        dog_result = await handle_dog_query(request.message)
+        if dog_result:
+            return ChatResponse(
+                response="Here's a cute dog for you!",
+                needs_search=True,
+                search_data=SearchResponse(
+                    query=request.message,
+                    images=[ImageResult(url=dog_result['image_url'], thumbnail=dog_result['image_url'], width=400, height=400)],
+                    web_results=[]
+                )
+            )
+        
+        cat_result = await handle_cat_query(request.message)
+        if cat_result:
+            return ChatResponse(
+                response="Here's a cute cat for you!",
+                needs_search=True,
+                search_data=SearchResponse(
+                    query=request.message,
+                    images=[ImageResult(url=cat_result['image_url'], thumbnail=cat_result['image_url'], width=400, height=400)],
+                    web_results=[]
+                )
+            )
+        
+        joke_result = await handle_joke_query(request.message)
+        if joke_result:
+            return ChatResponse(response=f"😄 {joke_result['joke']}", needs_search=False)
+        
+        quote_result = await handle_quote_query(request.message)
+        if quote_result:
+            quote = quote_result['data']
+            response_text = f"*\"{quote.get('en', '')}\"*\n\n— {quote.get('author', 'Unknown')}"
+            return ChatResponse(response=response_text, needs_search=False)
+        
+        ip_result = await handle_ip_query(request.message)
+        if ip_result:
+            ip_data = ip_result['data']
+            response_text = f"**IP Information**\n\n"
+            response_text += f"IP: {ip_data.get('ip', 'N/A')}\n"
+            response_text += f"Location: {ip_data.get('city', 'N/A')}, {ip_data.get('region', 'N/A')}, {ip_data.get('country', 'N/A')}\n"
+            response_text += f"Organization: {ip_data.get('org', 'N/A')}\n"
+            
+            return ChatResponse(response=response_text, needs_search=False)
+        
         # Determine if we need to search
         intent = await determine_intent(request.message)
         
@@ -575,7 +702,7 @@ async def chat(request: ChatRequest):
                 needs_search=False
             )
         
-        # If we need to search/use tools
+        # If we need to search/use tools (existing logic)
         else:
             # Perform full search
             search_result = await search(SearchRequest(query=request.message, num_results=10))
