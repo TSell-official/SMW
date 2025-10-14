@@ -9,6 +9,7 @@ const API = `${BACKEND_URL}/api`;
 function App() {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([]);
+  const [conversationHistory, setConversationHistory] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const messagesEndRef = useRef(null);
