@@ -84,17 +84,26 @@ function App() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    
+    // Add to conversation history for context
+    const historyMessage = { role: "user", content: inputValue };
+    setConversationHistory((prev) => [...prev, historyMessage]);
+    
     setInputValue("");
     setIsTyping(true);
     setIsSpinning(true);
 
     try {
-      const response = await axios.post(`${API}/search`, {
-        query: inputValue,
-        num_results: 10
+      // Use the new chat endpoint
+      const response = await axios.post(`${API}/chat`, {
+        message: inputValue,
+        conversation_history: conversationHistory
       });
 
-      const { text, data } = formatGerchResponse(response.data);
+      const text = response.data.response;
+      const needsSearch = response.data.needs_search;
+      const searchData = response.data.search_data;
+      
       const sentenceCount = countSentences(text);
 
       if (sentenceCount <= 3) {
@@ -106,30 +115,39 @@ function App() {
             timestamp: new Date()
           };
           setMessages((prev) => [...prev, gerchMessage]);
+          
+          // Add to conversation history
+          setConversationHistory((prev) => [...prev, { role: "assistant", content: text }]);
+          
           setTypingText("");
           
-          // Add follow-up question if images or articles are available
-          const hasImages = data.images && data.images.length > 0;
-          const hasLinks = data.web_results && data.web_results.length > 0;
-          
-          if (hasImages || hasLinks) {
-            setTimeout(() => {
-              let followUp = "Would you like me to show you ";
-              const options = [];
-              if (hasImages) options.push("images");
-              if (hasLinks) options.push("relevant articles");
-              followUp += options.join(" or ") + "?";
-              
-              const followUpMessage = {
-                role: "gerch",
-                content: followUp,
-                data: data,
-                timestamp: new Date()
-              };
-              setMessages((prev) => [...prev, followUpMessage]);
+          // Add follow-up question if search data is available
+          if (needsSearch && searchData) {
+            const hasImages = searchData.images && searchData.images.length > 0;
+            const hasLinks = searchData.web_results && searchData.web_results.length > 0;
+            
+            if (hasImages || hasLinks) {
+              setTimeout(() => {
+                let followUp = "Would you like me to show you ";
+                const options = [];
+                if (hasImages) options.push("images");
+                if (hasLinks) options.push("relevant articles");
+                followUp += options.join(" or ") + "?";
+                
+                const followUpMessage = {
+                  role: "gerch",
+                  content: followUp,
+                  data: searchData,
+                  timestamp: new Date()
+                };
+                setMessages((prev) => [...prev, followUpMessage]);
+                setIsTyping(false);
+                setIsSpinning(false);
+              }, 500);
+            } else {
               setIsTyping(false);
               setIsSpinning(false);
-            }, 500);
+            }
           } else {
             setIsTyping(false);
             setIsSpinning(false);
@@ -144,35 +162,43 @@ function App() {
         };
         setMessages((prev) => [...prev, gerchMessage]);
         
-        // Add follow-up question if images or articles are available
-        const hasImages = data.images && data.images.length > 0;
-        const hasLinks = data.web_results && data.web_results.length > 0;
+        // Add to conversation history
+        setConversationHistory((prev) => [...prev, { role: "assistant", content: text }]);
         
-        if (hasImages || hasLinks) {
-          setTimeout(() => {
-            let followUp = "Would you like me to show you ";
-            const options = [];
-            if (hasImages) options.push("images");
-            if (hasLinks) options.push("relevant articles");
-            followUp += options.join(" or ") + "?";
-            
-            const followUpMessage = {
-              role: "gerch",
-              content: followUp,
-              data: data,
-              timestamp: new Date()
-            };
-            setMessages((prev) => [...prev, followUpMessage]);
+        // Add follow-up question if search data is available
+        if (needsSearch && searchData) {
+          const hasImages = searchData.images && searchData.images.length > 0;
+          const hasLinks = searchData.web_results && searchData.web_results.length > 0;
+          
+          if (hasImages || hasLinks) {
+            setTimeout(() => {
+              let followUp = "Would you like me to show you ";
+              const options = [];
+              if (hasImages) options.push("images");
+              if (hasLinks) options.push("relevant articles");
+              followUp += options.join(" or ") + "?";
+              
+              const followUpMessage = {
+                role: "gerch",
+                content: followUp,
+                data: searchData,
+                timestamp: new Date()
+              };
+              setMessages((prev) => [...prev, followUpMessage]);
+              setIsTyping(false);
+              setIsSpinning(false);
+            }, 500);
+          } else {
             setIsTyping(false);
             setIsSpinning(false);
-          }, 500);
+          }
         } else {
           setIsTyping(false);
           setIsSpinning(false);
         }
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Chat error:', error);
       const errorMessage = {
         role: "gerch",
         content: "I apologize, but I encountered an error. Please try again.",
