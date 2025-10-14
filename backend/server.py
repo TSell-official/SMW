@@ -45,7 +45,7 @@ class SearchResponse(BaseModel):
     query: str
     results: List[SearchResult]
     total_results: Optional[str] = None
-    search_time: Optional[float] = None
+    search_time: Optional[str] = None
 
 class AskRequest(BaseModel):
     question: str
