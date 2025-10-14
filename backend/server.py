@@ -222,7 +222,7 @@ class ChatResponse(BaseModel):
 async def determine_intent(message: str) -> Dict[str, Any]:
     """Determine if message needs search or just conversation"""
     # Keywords that indicate search needs
-    search_keywords = ["search", "find", "show me", "images of", "pictures of", "articles about", "define", "what is"]
+    search_keywords = ["search", "find", "show me", "images of", "pictures of", "articles about", "define", "what is", "tell me about", "explain"]
     
     message_lower = message.lower()
     needs_search = any(keyword in message_lower for keyword in search_keywords)
@@ -237,6 +237,49 @@ async def determine_intent(message: str) -> Dict[str, Any]:
         needs_search = True
     
     return {"needs_search": needs_search}
+
+async def generate_conversational_response(message: str, history: List[Dict[str, str]]) -> str:
+    """Generate conversational response with fallback to rule-based responses"""
+    message_lower = message.lower()
+    
+    # Greetings
+    greetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening"]
+    if any(greeting in message_lower for greeting in greetings):
+        return "Hello! I'm Gerch, your AI assistant. I'm here to help you search the web, answer questions, do calculations, define words, and much more. What can I help you with today?"
+    
+    # How are you
+    if "how are you" in message_lower or "how's it going" in message_lower:
+        return "I'm doing great, thank you for asking! I'm ready to help you with anything you need. Whether it's searching the web, doing calculations, or just having a chat, I'm here for you."
+    
+    # Thank you
+    if "thank" in message_lower:
+        return "You're very welcome! I'm always happy to help. Feel free to ask me anything else!"
+    
+    # What can you do / help with
+    if ("what can you" in message_lower or "what do you" in message_lower or "help me with" in message_lower or "your capabilities" in message_lower):
+        return "I can help you with many things! I can search the web for information, show you images, define words, calculate math expressions, provide summaries from Wikipedia, and have natural conversations. Just ask me anything!"
+    
+    # Goodbye
+    if any(word in message_lower for word in ["goodbye", "bye", "see you", "later"]):
+        return "Goodbye! It was nice chatting with you. Come back anytime you need help!"
+    
+    # Try to use Cerebras for other conversations
+    try:
+        response = cerebras_client.chat.completions.create(
+            model="llama3.1-8b",
+            messages=[
+                {"role": "system", "content": "You are Gerch, a helpful and friendly AI assistant. Keep responses concise and natural."},
+                *history[-4:],
+                {"role": "user", "content": message}
+            ],
+            max_tokens=300,
+            temperature=0.8
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        logging.error(f"Cerebras conversation error: {e}")
+        # Fallback response
+        return "I'm here to help! You can ask me to search for information, show you images, define words, calculate math problems, or just chat. What would you like to know?"
 
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
