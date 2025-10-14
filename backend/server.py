@@ -86,8 +86,8 @@ async def search(request: SearchRequest):
         
         # Get search metadata
         search_info = results_data.get("search_information", {})
-        total_results = search_info.get("total_results", "")
-        search_time = search_info.get("time_taken_displayed", 0)
+        total_results = str(search_info.get("total_results", ""))
+        search_time = str(search_info.get("time_taken_displayed", 0))
         
         return SearchResponse(
             query=request.query,
