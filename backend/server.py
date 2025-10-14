@@ -30,6 +30,9 @@ cerebras_client = Cerebras(api_key=os.environ.get('CEREBRAS_API_KEY'))
 SERPAPI_KEY = os.environ.get('SERPAPI_KEY')
 PIXABAY_API_KEY = os.environ.get('PIXABAY_API_KEY')
 
+# Pollinations.AI - No API key needed!
+POLLINATIONS_BASE_URL = "https://image.pollinations.ai/prompt/"
+
 # Create the main app
 app = FastAPI(title="Gerch Search Engine", version="2.0.0")
 api_router = APIRouter(prefix="/api")
