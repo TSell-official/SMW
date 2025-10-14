@@ -301,32 +301,62 @@ async def chat(request: ChatRequest):
             search_result = await search(SearchRequest(query=request.message, num_results=10))
             
             # Generate conversational response based on search results
-            context = ""
+            response_text = ""
+            
             if search_result.calculator_result and search_result.calculator_result.get("success"):
-                context = f"Calculator result: {search_result.calculator_result['result']}"
+                result = search_result.calculator_result['result']
+                response_text = f"The answer is {result}."
+            
             elif search_result.dictionary:
                 dict_data = search_result.dictionary
-                context = f"Dictionary: {dict_data['word']} - {dict_data['definitions'][0]['definition']}"
-            elif search_result.ai_overview:
-                context = search_result.ai_overview
+                word = dict_data['word']
+                phonetic = dict_data.get('phonetic', '')
+                definitions = dict_data['definitions']
+                
+                response_text = f"**{word}**"
+                if phonetic:
+                    response_text += f" {phonetic}"
+                response_text += "\n\n"
+                
+                for defn in definitions[:2]:
+                    response_text += f"*{defn['part_of_speech']}*: {defn['definition']}\n"
+                    if defn.get('example'):
+                        response_text += f"Example: \"{defn['example']}\"\n"
+            
             elif search_result.wikipedia_summary:
-                context = search_result.wikipedia_summary
+                response_text = search_result.wikipedia_summary
             
-            # Generate natural response
-            messages = [
-                {"role": "system", "content": "You are Gerch. Based on the search results provided, give a natural, conversational response. Be friendly and helpful."},
-                {"role": "user", "content": f"User asked: {request.message}\n\nSearch context: {context}\n\nProvide a natural response."}
-            ]
+            elif search_result.web_results:
+                # Use first web result snippet
+                response_text = f"Based on my search: {search_result.web_results[0].snippet}"
             
-            response = cerebras_client.chat.completions.create(
-                model="llama3.1-8b",
-                messages=messages,
-                max_tokens=500,
-                temperature=0.7
-            )
+            else:
+                response_text = "I found some information, but let me show you what I discovered."
+            
+            # Try to enhance with AI if available
+            try:
+                if search_result.calculator_result and not search_result.calculator_result.get("success"):
+                    pass  # Keep simple response for calculator
+                elif search_result.dictionary:
+                    pass  # Keep simple response for dictionary
+                else:
+                    # Try to use Cerebras for natural response
+                    ai_response = cerebras_client.chat.completions.create(
+                        model="llama3.1-8b",
+                        messages=[
+                            {"role": "system", "content": "You are Gerch. Provide a brief, natural response based on the search context. Be conversational."},
+                            {"role": "user", "content": f"User asked: {request.message}\n\nContext: {response_text[:500]}\n\nProvide a natural 2-3 sentence response."}
+                        ],
+                        max_tokens=200,
+                        temperature=0.7
+                    )
+                    response_text = ai_response.choices[0].message.content
+            except Exception as e:
+                logging.error(f"AI enhancement error: {e}")
+                # Keep the original response_text
             
             return ChatResponse(
-                response=response.choices[0].message.content,
+                response=response_text,
                 needs_search=True,
                 search_data=search_result
             )
