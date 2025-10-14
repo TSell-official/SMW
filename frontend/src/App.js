@@ -70,18 +70,6 @@ function App() {
       response = data.wikipedia_summary;
     }
     
-    // Add follow-up question
-    const hasImages = data.images && data.images.length > 0;
-    const hasLinks = data.web_results && data.web_results.length > 0;
-    
-    if (hasImages || hasLinks) {
-      response += "\\n\\nWould you like me to show you ";
-      const options = [];
-      if (hasImages) options.push("images");
-      if (hasLinks) options.push("relevant articles");
-      response += options.join(" or ") + "?";
-    }
-    
     return { text: response, data };
   };
 
