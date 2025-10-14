@@ -227,15 +227,18 @@ backend:
 
   - task: "Jokes and Quotes Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "low"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added handle_joke_query() for Chuck Norris jokes and handle_quote_query() for programming quotes"
+      - working: true
+        agent: "testing"
+        comment: "Jokes and quotes integration working perfectly. Chuck Norris jokes API working correctly. Programming quotes now using fallback implementation with curated quotes after original API was unavailable. Both features functional."
 
   - task: "IP Info Integration"
     implemented: true
