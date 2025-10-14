@@ -137,15 +137,18 @@ backend:
 
   - task: "Cryptocurrency API Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added handle_crypto_query() for CoinGecko crypto prices (Bitcoin, Ethereum, Dogecoin, Cardano, Solana)"
+      - working: true
+        agent: "testing"
+        comment: "Cryptocurrency API working excellently. Successfully retrieves current prices with 24h change for Bitcoin ($113,023), Ethereum ($4,117), Dogecoin ($0.20) and other cryptocurrencies. Response format is clean and informative."
 
   - task: "Academic Papers API Integration"
     implemented: true
