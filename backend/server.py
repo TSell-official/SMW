@@ -212,7 +212,108 @@ async def search_pixabay_images(query: str, per_page: int = 8) -> List[ImageResu
         logging.error(f"Pixabay error: {e}")
     return []
 
-# Search endpoint
+# Conversational chat endpoint
+class ChatRequest(BaseModel):
+    message: str
+    conversation_history: Optional[List[Dict[str, str]]] = []
+
+class ChatResponse(BaseModel):
+    response: str
+    needs_search: bool = False
+    search_data: Optional[SearchResponse] = None
+
+async def determine_intent(message: str) -> Dict[str, Any]:
+    """Determine if message needs search or just conversation"""
+    # Keywords that indicate search needs
+    search_keywords = ["search", "find", "show me", "images of", "pictures of", "articles about", "define", "what is"]
+    
+    message_lower = message.lower()
+    needs_search = any(keyword in message_lower for keyword in search_keywords)
+    
+    # Always search for definitions of single words
+    words = message.split()
+    if len(words) == 1 and len(words[0]) > 3:
+        needs_search = True
+    
+    # Always calculate math expressions
+    if calculator.is_valid_expression(message):
+        needs_search = True
+    
+    return {"needs_search": needs_search}
+
+@api_router.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    try:
+        # Determine if we need to search
+        intent = await determine_intent(request.message)
+        
+        # If it's just a conversation
+        if not intent["needs_search"]:
+            # Use OpenRouter for conversational response
+            messages = [
+                {"role": "system", "content": "You are Gerch, a helpful and friendly AI assistant. You're knowledgeable, conversational, and can discuss any topic. Be warm, engaging, and natural in your responses. Keep responses concise but informative."}
+            ]
+            
+            # Add conversation history
+            for msg in request.conversation_history[-6:]:  # Keep last 6 messages for context
+                messages.append(msg)
+            
+            # Add current message
+            messages.append({"role": "user", "content": request.message})
+            
+            response = await openrouter_client.chat.completions.create(
+                model="anthropic/claude-3.5-sonnet",
+                messages=messages,
+                max_tokens=500,
+                temperature=0.8
+            )
+            
+            return ChatResponse(
+                response=response.choices[0].message.content,
+                needs_search=False
+            )
+        
+        # If we need to search/use tools
+        else:
+            # Perform full search
+            search_result = await search(SearchRequest(query=request.message, num_results=10))
+            
+            # Generate conversational response based on search results
+            context = ""
+            if search_result.calculator_result and search_result.calculator_result.get("success"):
+                context = f"Calculator result: {search_result.calculator_result['result']}"
+            elif search_result.dictionary:
+                dict_data = search_result.dictionary
+                context = f"Dictionary: {dict_data['word']} - {dict_data['definitions'][0]['definition']}"
+            elif search_result.ai_overview:
+                context = search_result.ai_overview
+            elif search_result.wikipedia_summary:
+                context = search_result.wikipedia_summary
+            
+            # Generate natural response
+            messages = [
+                {"role": "system", "content": "You are Gerch. Based on the search results provided, give a natural, conversational response. Be friendly and helpful."},
+                {"role": "user", "content": f"User asked: {request.message}\n\nSearch context: {context}\n\nProvide a natural response."}
+            ]
+            
+            response = await openrouter_client.chat.completions.create(
+                model="anthropic/claude-3.5-sonnet",
+                messages=messages,
+                max_tokens=500,
+                temperature=0.7
+            )
+            
+            return ChatResponse(
+                response=response.choices[0].message.content,
+                needs_search=True,
+                search_data=search_result
+            )
+    
+    except Exception as e:
+        logging.error(f"Chat error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chat failed: {str(e)}")
+
+# Legacy search endpoint (keep for compatibility)
 @api_router.post("/search", response_model=SearchResponse)
 async def search(request: SearchRequest):
     try:
