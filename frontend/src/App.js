@@ -43,36 +43,7 @@ function App() {
     }, 30);
   };
 
-  const formatGerchResponse = (data) => {
-    let response = "";
-    
-    // Add AI overview if available
-    if (data.ai_overview) {
-      response = data.ai_overview;
-    }
-    
-    // Add calculator result
-    if (data.calculator_result && data.calculator_result.success) {
-      response = `The answer is ${data.calculator_result.result}.`;
-    }
-    
-    // Add dictionary definition
-    if (data.dictionary) {
-      const dict = data.dictionary;
-      response = `**${dict.word}** ${dict.phonetic ? `(${dict.phonetic})` : ''}\\n\\n`;
-      dict.definitions.forEach((def, idx) => {
-        response += `*${def.part_of_speech}*: ${def.definition}\\n`;
-        if (def.example) response += `Example: "${def.example}"\\n`;
-      });
-    }
-    
-    // Add Wikipedia summary
-    if (data.wikipedia_summary && !data.ai_overview) {
-      response = data.wikipedia_summary;
-    }
-    
-    return { text: response, data };
-  };
+ 
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
