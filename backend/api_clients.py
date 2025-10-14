@@ -115,7 +115,7 @@ class StackExchangeClient:
                         "sort": "relevance",
                         "order": "desc",
                         "pagesize": max_results,
-                        "filter": "!9_bDE(xjY3"
+                        "filter": "default"
                     }
                 )
                 if response.status_code == 200:
