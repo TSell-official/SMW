@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-import wikipediaapi
+import requests
 from cerebras.cloud.sdk import Cerebras
 from sentence_transformers import SentenceTransformer
 import faiss
@@ -33,11 +33,9 @@ embedding_model = None
 faiss_index = None
 document_store = []  # Store document chunks with metadata
 
-# Wikipedia API
-wiki_wiki = wikipediaapi.Wikipedia(
-    user_agent='WikiAI/1.0 (dark-wiki-ai)',
-    language='en'
-)
+# Wikipedia API configuration
+WIKI_API_URL = "https://en.wikipedia.org/w/api.php"
+WIKI_USER_AGENT = "WikiAI/1.0 (dark-wiki-ai)"
 
 # Create the main app
 app = FastAPI()
