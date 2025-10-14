@@ -14,6 +14,11 @@ from serpapi import GoogleSearch
 from cerebras.cloud.sdk import Cerebras
 import httpx
 import asyncio
+from api_clients import (
+    PollinationsClient, CoinGeckoClient, ArxivClient, StackExchangeClient,
+    DuckDuckGoClient, OpenMeteoClient, ProgrammingQuotesClient, IPInfoClient,
+    UnsplashClient, PokeAPIClient, DogAPIClient, CatAPIClient, ChuckNorrisClient
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
