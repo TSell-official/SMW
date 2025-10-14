@@ -246,7 +246,7 @@ async def chat(request: ChatRequest):
         
         # If it's just a conversation
         if not intent["needs_search"]:
-            # Use OpenRouter for conversational response
+            # Use Cerebras for conversational response
             messages = [
                 {"role": "system", "content": "You are Gerch, a helpful and friendly AI assistant. You're knowledgeable, conversational, and can discuss any topic. Be warm, engaging, and natural in your responses. Keep responses concise but informative."}
             ]
@@ -258,8 +258,8 @@ async def chat(request: ChatRequest):
             # Add current message
             messages.append({"role": "user", "content": request.message})
             
-            response = await openrouter_client.chat.completions.create(
-                model="anthropic/claude-3.5-sonnet",
+            response = cerebras_client.chat.completions.create(
+                model="llama3.1-8b",
                 messages=messages,
                 max_tokens=500,
                 temperature=0.8
