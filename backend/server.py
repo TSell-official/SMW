@@ -119,14 +119,14 @@ calculator = CalculatorService()
 
 # Helper Functions
 async def get_ai_overview(query: str) -> Optional[str]:
-    """Get AI overview using OpenRouter"""
+    """Get AI overview using Cerebras"""
     try:
-        response = await openrouter_client.chat.completions.create(
-            model="anthropic/claude-3.5-sonnet",
+        response = cerebras_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "You are a helpful search assistant. Provide a concise, accurate overview of the topic in 2-3 sentences."},
                 {"role": "user", "content": f"Provide a brief overview about: {query}"}
             ],
+            model="llama3.1-8b",
             max_tokens=200,
             temperature=0.7
         )
