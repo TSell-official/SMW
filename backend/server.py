@@ -11,7 +11,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from serpapi import GoogleSearch
-from openai import AsyncOpenAI
+from cerebras.cloud.sdk import Cerebras
 import httpx
 import asyncio
 
