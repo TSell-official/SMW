@@ -247,6 +247,37 @@ async def determine_intent(message: str) -> Dict[str, Any]:
     message_lower = message.lower()
     needs_search = any(keyword in message_lower for keyword in search_keywords)
     
+    # Check for specific API triggers
+    if any(word in message_lower for word in ["generate image", "create image", "draw", "make a picture", "can you generate an image", "can you create an image"]):
+        needs_search = True
+    
+    if any(word in message_lower for word in ["crypto", "bitcoin", "ethereum", "price of"]):
+        needs_search = True
+    
+    if any(word in message_lower for word in ["research", "paper", "arxiv", "academic"]):
+        needs_search = True
+    
+    if any(word in message_lower for word in ["programming question", "stack overflow", "how to code"]):
+        needs_search = True
+    
+    if any(word in message_lower for word in ["weather", "temperature", "forecast"]):
+        needs_search = True
+    
+    if any(word in message_lower for word in ["pokemon", "pokémon"]):
+        needs_search = True
+    
+    if "dog" in message_lower or "cat" in message_lower or "puppy" in message_lower or "kitten" in message_lower:
+        needs_search = True
+    
+    if "joke" in message_lower and "chuck" in message_lower:
+        needs_search = True
+    
+    if "quote" in message_lower and ("programming" in message_lower or "dev" in message_lower):
+        needs_search = True
+    
+    if "my ip" in message_lower or "ip address" in message_lower or "ip info" in message_lower:
+        needs_search = True
+    
     # Always search for definitions of single words
     words = message.split()
     if len(words) == 1 and len(words[0]) > 3:
@@ -257,6 +288,235 @@ async def determine_intent(message: str) -> Dict[str, Any]:
         needs_search = True
     
     return {"needs_search": needs_search}
+
+
+async def handle_pollinations_query(message: str) -> Optional[Dict]:
+    """Handle Pollinations.AI image generation"""
+    message_lower = message.lower()
+    
+    triggers = ["generate image", "create image", "draw", "make a picture", "generate an image", "create an image", "can you generate", "can you create"]
+    
+    if any(trigger in message_lower for trigger in triggers):
+        # Extract the prompt
+        prompt = message
+        for trigger in triggers:
+            prompt = prompt.lower().replace(trigger, "").strip()
+        
+        if not prompt or prompt.startswith("of"):
+            prompt = prompt.replace("of", "").strip()
+        
+        if not prompt:
+            prompt = "a beautiful landscape"
+        
+        image_url = pollinations.generate_image_url(prompt)
+        
+        return {
+            "type": "image_generation",
+            "image_url": image_url,
+            "prompt": prompt
+        }
+    
+    return None
+
+
+async def handle_crypto_query(message: str) -> Optional[Dict]:
+    """Handle cryptocurrency queries"""
+    message_lower = message.lower()
+    
+    if any(word in message_lower for word in ["crypto", "bitcoin", "ethereum", "price"]):
+        coin_ids = []
+        
+        if "bitcoin" in message_lower or "btc" in message_lower:
+            coin_ids.append("bitcoin")
+        if "ethereum" in message_lower or "eth" in message_lower:
+            coin_ids.append("ethereum")
+        if "dogecoin" in message_lower or "doge" in message_lower:
+            coin_ids.append("dogecoin")
+        if "cardano" in message_lower or "ada" in message_lower:
+            coin_ids.append("cardano")
+        if "solana" in message_lower or "sol" in message_lower:
+            coin_ids.append("solana")
+        
+        if not coin_ids:
+            coin_ids = ["bitcoin", "ethereum"]
+        
+        prices = await coingecko.get_price(",".join(coin_ids))
+        
+        if prices:
+            return {
+                "type": "crypto",
+                "data": prices
+            }
+    
+    return None
+
+
+async def handle_arxiv_query(message: str) -> Optional[Dict]:
+    """Handle academic paper queries"""
+    message_lower = message.lower()
+    
+    if any(word in message_lower for word in ["research", "paper", "arxiv", "academic"]):
+        query = message
+        for word in ["research on", "paper about", "arxiv", "academic"]:
+            query = query.lower().replace(word, "").strip()
+        
+        if query:
+            papers = await arxiv.search(query)
+            if papers:
+                return {
+                    "type": "arxiv",
+                    "papers": papers
+                }
+    
+    return None
+
+
+async def handle_stackoverflow_query(message: str) -> Optional[Dict]:
+    """Handle Stack Overflow queries"""
+    message_lower = message.lower()
+    
+    if any(word in message_lower for word in ["stack overflow", "programming question", "how to code"]):
+        query = message
+        for word in ["stack overflow", "programming question", "how to code"]:
+            query = query.lower().replace(word, "").strip()
+        
+        if query:
+            questions = await stackexchange.search(query)
+            if questions:
+                return {
+                    "type": "stackoverflow",
+                    "questions": questions
+                }
+    
+    return None
+
+
+async def handle_weather_query(message: str) -> Optional[Dict]:
+    """Handle weather queries"""
+    message_lower = message.lower()
+    
+    if any(word in message_lower for word in ["weather", "temperature", "forecast"]):
+        # Default location (New York)
+        latitude, longitude = 40.7128, -74.0060
+        location_name = "New York"
+        
+        # Simple location detection
+        if "london" in message_lower:
+            latitude, longitude = 51.5074, -0.1278
+            location_name = "London"
+        elif "paris" in message_lower:
+            latitude, longitude = 48.8566, 2.3522
+            location_name = "Paris"
+        elif "tokyo" in message_lower:
+            latitude, longitude = 35.6762, 139.6503
+            location_name = "Tokyo"
+        elif "sydney" in message_lower:
+            latitude, longitude = -33.8688, 151.2093
+            location_name = "Sydney"
+        
+        weather_data = await openmeteo.get_weather(latitude, longitude)
+        
+        if weather_data and weather_data.get("current_weather"):
+            return {
+                "type": "weather",
+                "data": weather_data["current_weather"],
+                "location": location_name
+            }
+    
+    return None
+
+
+async def handle_pokemon_query(message: str) -> Optional[Dict]:
+    """Handle Pokemon queries"""
+    message_lower = message.lower()
+    
+    if "pokemon" in message_lower or "pokémon" in message_lower:
+        pokemon_name = message_lower.replace("pokemon", "").replace("pokémon", "").strip()
+        
+        if pokemon_name:
+            pokemon_data = await pokeapi.get_pokemon(pokemon_name)
+            if pokemon_data:
+                return {
+                    "type": "pokemon",
+                    "data": pokemon_data
+                }
+    
+    return None
+
+
+async def handle_dog_query(message: str) -> Optional[Dict]:
+    """Handle dog image queries"""
+    message_lower = message.lower()
+    
+    if "dog" in message_lower or "puppy" in message_lower:
+        image_url = await dogapi.get_random_dog()
+        if image_url:
+            return {
+                "type": "dog",
+                "image_url": image_url
+            }
+    
+    return None
+
+
+async def handle_cat_query(message: str) -> Optional[Dict]:
+    """Handle cat image queries"""
+    message_lower = message.lower()
+    
+    if "cat" in message_lower or "kitten" in message_lower:
+        image_url = await catapi.get_random_cat()
+        if image_url:
+            return {
+                "type": "cat",
+                "image_url": image_url
+            }
+    
+    return None
+
+
+async def handle_joke_query(message: str) -> Optional[Dict]:
+    """Handle joke queries"""
+    message_lower = message.lower()
+    
+    if "joke" in message_lower and ("chuck" in message_lower or "norris" in message_lower):
+        joke = await chucknorris.get_random_joke()
+        if joke:
+            return {
+                "type": "joke",
+                "joke": joke
+            }
+    
+    return None
+
+
+async def handle_quote_query(message: str) -> Optional[Dict]:
+    """Handle programming quote queries"""
+    message_lower = message.lower()
+    
+    if "quote" in message_lower and ("programming" in message_lower or "dev" in message_lower):
+        quote_data = await programming_quotes.get_random_quote()
+        if quote_data:
+            return {
+                "type": "quote",
+                "data": quote_data
+            }
+    
+    return None
+
+
+async def handle_ip_query(message: str) -> Optional[Dict]:
+    """Handle IP info queries"""
+    message_lower = message.lower()
+    
+    if "my ip" in message_lower or "ip address" in message_lower or "ip info" in message_lower:
+        ip_data = await ipinfo.get_ip_info()
+        if ip_data:
+            return {
+                "type": "ip_info",
+                "data": ip_data
+            }
+    
+    return None
 
 async def generate_conversational_response(message: str, history: List[Dict[str, str]]) -> str:
     """Generate conversational response with fallback to rule-based responses"""
