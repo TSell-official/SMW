@@ -390,9 +390,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Pollinations.ai Image Generation"
+    - "Frontend Testing Required"
     - "Conversation Memory and Sidebar"
-    - "All New API Integrations"
     - "Typing Effect Toggle"
     - "Copy/Delete Message Features"
   stuck_tasks: []
