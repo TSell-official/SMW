@@ -182,16 +182,16 @@ class ProgrammingQuotesClient:
     """Programming Quotes API"""
     
     def __init__(self):
-        self.base_url = "https://programming-quotes-api.herokuapp.com"
+        self.base_url = "https://programming-quotesapi.vercel.app"
     
     async def get_random_quote(self) -> Optional[Dict]:
         """Get random programming quote"""
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(f"{self.base_url}/quotes/random")
+                response = await client.get(f"{self.base_url}/api/random")
                 if response.status_code == 200:
                     data = response.json()
-                    return data[0] if isinstance(data, list) and len(data) > 0 else data
+                    return data
         except Exception as e:
             logger.error(f"ProgrammingQuotes error: {e}")
         return None
