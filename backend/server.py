@@ -217,12 +217,13 @@ async def ask_question(request: AskRequest):
             context_text = request.context[:3000]  # Limit context size
         else:
             # Search for relevant Wikipedia articles
-            search_results = wiki_wiki.search(request.question, results=2)
+            search_results = search_wikipedia(request.question, limit=2)
             context_text = ""
-            for title in search_results[:2]:
-                page = wiki_wiki.page(title)
-                if page.exists():
-                    context_text += f"\n\n{page.title}:\n{page.summary[:1000]}"
+            for title, description, url in search_results[:2]:
+                page_data = get_wikipedia_page(title)
+                if page_data:
+                    extract = page_data.get("extract", "")
+                    context_text += f"\n\n{title}:\n{extract[:1000]}"
         
         # Use Cerebras to answer the question
         cerebras_response = cerebras_client.chat.completions.create(
