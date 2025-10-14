@@ -289,27 +289,9 @@ async def chat(request: ChatRequest):
         
         # If it's just a conversation
         if not intent["needs_search"]:
-            # Use Cerebras for conversational response
-            messages = [
-                {"role": "system", "content": "You are Gerch, a helpful and friendly AI assistant. You're knowledgeable, conversational, and can discuss any topic. Be warm, engaging, and natural in your responses. Keep responses concise but informative."}
-            ]
-            
-            # Add conversation history
-            for msg in request.conversation_history[-6:]:  # Keep last 6 messages for context
-                messages.append(msg)
-            
-            # Add current message
-            messages.append({"role": "user", "content": request.message})
-            
-            response = cerebras_client.chat.completions.create(
-                model="llama3.1-8b",
-                messages=messages,
-                max_tokens=500,
-                temperature=0.8
-            )
-            
+            response_text = await generate_conversational_response(request.message, request.conversation_history)
             return ChatResponse(
-                response=response.choices[0].message.content,
+                response=response_text,
                 needs_search=False
             )
         
