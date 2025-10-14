@@ -152,15 +152,18 @@ backend:
 
   - task: "Academic Papers API Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added handle_arxiv_query() for academic paper searches via Arxiv API"
+      - working: true
+        agent: "testing"
+        comment: "Minor: Arxiv API working for most queries ('quantum computing', 'machine learning') but inconsistent response format for some queries. Core functionality operational - successfully retrieves academic papers with titles, summaries, and links."
 
   - task: "Stack Overflow Integration"
     implemented: true
