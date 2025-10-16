@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "@/App.css";
-import { Send, Sparkles, Menu, Plus, Copy, Trash2, RefreshCw, Lightbulb } from "lucide-react";
+import { Send, Sparkles, Menu, Plus, Copy, Trash2 } from "lucide-react";
 import axios from "axios";
-import { enhanceQuery, generateRelatedQuestions, initializeModel } from './services/mlService';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -19,26 +18,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [typingEffectEnabled, setTypingEffectEnabled] = useState(true);
   const [typingText, setTypingText] = useState("");
-  const [relatedQuestions, setRelatedQuestions] = useState([]);
-  const [mlReady, setMlReady] = useState(false);
   const messagesEndRef = useRef(null);
-
-  // Initialize ML model on mount (lazy load)
-  useEffect(() => {
-    const loadModel = async () => {
-      try {
-        await initializeModel();
-        setMlReady(true);
-        console.log('🧠 ML capabilities enabled');
-      } catch (error) {
-        console.log('⚠️ ML not available, using fallback mode');
-        setMlReady(false);
-      }
-    };
-    
-    // Load model after a short delay to prioritize UI
-    setTimeout(loadModel, 1000);
-  }, []);
 
   // Scroll to bottom
   const scrollToBottom = () => {
@@ -69,6 +49,7 @@ function App() {
         const parsedConversations = JSON.parse(savedConversations);
         setConversations(parsedConversations);
 
+        // Load the current conversation
         if (savedCurrentId) {
           const currentConv = parsedConversations.find(c => c.id === parseInt(savedCurrentId));
           if (currentConv) {
@@ -114,18 +95,17 @@ function App() {
   const createNewConversation = () => {
     const newConv = {
       id: Date.now(),
-      title: 'New Search',
+      title: 'New Chat',
       messages: [],
       history: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    setConversations(prev => [newConv, ...prev].slice(0, 50));
+    setConversations(prev => [newConv, ...prev].slice(0, 50)); // Keep only 50 conversations
     setCurrentConversationId(newConv.id);
     setMessages([]);
     setConversationHistory([]);
-    setRelatedQuestions([]);
   };
 
   const loadConversation = (convId) => {
@@ -155,8 +135,9 @@ function App() {
     setConversations(prev => {
       return prev.map(conv => {
         if (conv.id === currentConversationId) {
+          // Update title if it's still "New Chat"
           let title = conv.title;
-          if (title === 'New Search' && newMessages.length > 0) {
+          if (title === 'New Chat' && newMessages.length > 0) {
             const firstUserMsg = newMessages.find(m => m.role === 'user');
             if (firstUserMsg) {
               title = firstUserMsg.content.length > 40 
@@ -180,6 +161,7 @@ function App() {
 
   const copyMessage = (text) => {
     navigator.clipboard.writeText(text);
+    // You could add a toast notification here
   };
 
   const deleteMessage = (index) => {
@@ -210,23 +192,23 @@ function App() {
         clearInterval(interval);
         callback();
       }
-    }, 15);
+    }, 20);
   };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
-    const userQuery = inputValue;
     const userMessage = {
       role: "user",
-      content: userQuery,
+      content: inputValue,
       timestamp: new Date().toISOString()
     };
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     
-    const historyMessage = { role: "user", content: userQuery };
+    // Add to conversation history for context
+    const historyMessage = { role: "user", content: inputValue };
     const newHistory = [...conversationHistory, historyMessage];
     setConversationHistory(newHistory);
     
@@ -235,20 +217,9 @@ function App() {
     setIsSpinning(true);
 
     try {
-      // Enhance query with ML if available
-      let queryIntent = null;
-      if (mlReady) {
-        try {
-          queryIntent = await enhanceQuery(userQuery);
-          console.log('🎯 Query intent:', queryIntent);
-        } catch (error) {
-          console.log('ML enhancement failed, using fallback');
-        }
-      }
-
-      // Call backend API
+      // Use the chat endpoint
       const response = await axios.post(`${API}/chat`, {
-        message: userQuery,
+        message: inputValue,
         conversation_history: conversationHistory
       });
 
@@ -256,36 +227,29 @@ function App() {
       const needsSearch = response.data.needs_search;
       const searchData = response.data.search_data;
       
-      // Generate related questions
-      if (mlReady) {
-        try {
-          const related = await generateRelatedQuestions(userQuery, text);
-          setRelatedQuestions(related);
-        } catch (error) {
-          console.log('Failed to generate related questions');
-        }
-      }
-
       const sentenceCount = countSentences(text);
 
       if (sentenceCount <= 3 && typingEffectEnabled) {
+        // Typing effect for short responses
         typeText(text, () => {
           const gerchMessage = {
             role: "gerch",
             content: text,
-            sources: searchData?.web_results || [],
-            timestamp: new Date().toISOString(),
-            queryIntent: queryIntent
+            timestamp: new Date().toISOString()
           };
           const updatedMessages = [...newMessages, gerchMessage];
           setMessages(updatedMessages);
           
+          // Add to conversation history
           const updatedHistory = [...newHistory, { role: "assistant", content: text }];
           setConversationHistory(updatedHistory);
           
           setTypingText("");
+          
+          // Update conversation
           updateCurrentConversation(updatedMessages, updatedHistory);
           
+          // Add follow-up question if search data is available
           if (needsSearch && searchData) {
             const hasImages = searchData.images && searchData.images.length > 0;
             const hasLinks = searchData.web_results && searchData.web_results.length > 0;
@@ -295,7 +259,7 @@ function App() {
                 let followUp = "Would you like me to show you ";
                 const options = [];
                 if (hasImages) options.push("images");
-                if (hasLinks) options.push("more sources");
+                if (hasLinks) options.push("relevant articles");
                 followUp += options.join(" or ") + "?";
                 
                 const followUpMessage = {
@@ -320,21 +284,23 @@ function App() {
           }
         });
       } else {
+        // Instant display for long responses or if typing effect is disabled
         const gerchMessage = {
           role: "gerch",
           content: text,
-          sources: searchData?.web_results || [],
-          timestamp: new Date().toISOString(),
-          queryIntent: queryIntent
+          timestamp: new Date().toISOString()
         };
         const updatedMessages = [...newMessages, gerchMessage];
         setMessages(updatedMessages);
         
+        // Add to conversation history
         const updatedHistory = [...newHistory, { role: "assistant", content: text }];
         setConversationHistory(updatedHistory);
         
+        // Update conversation
         updateCurrentConversation(updatedMessages, updatedHistory);
         
+        // Add follow-up question if search data is available
         if (needsSearch && searchData) {
           const hasImages = searchData.images && searchData.images.length > 0;
           const hasLinks = searchData.web_results && searchData.web_results.length > 0;
@@ -344,7 +310,7 @@ function App() {
               let followUp = "Would you like me to show you ";
               const options = [];
               if (hasImages) options.push("images");
-              if (hasLinks) options.push("more sources");
+              if (hasLinks) options.push("relevant articles");
               followUp += options.join(" or ") + "?";
               
               const followUpMessage = {
@@ -390,10 +356,6 @@ function App() {
     }
   };
 
-  const handleRelatedQuestion = (question) => {
-    setInputValue(question);
-  };
-
   const showImages = (data) => {
     if (data.images && data.images.length > 0) {
       const imagesMessage = {
@@ -429,26 +391,23 @@ function App() {
     
     if (diffInDays === 0) return 'Today';
     if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays}d ago`;
+    if (diffInDays < 7) return `${diffInDays} days ago`;
     return date.toLocaleDateString();
   };
 
   return (
-    <div className="App perplexity-mode" data-testid="app-container">
+    <div className="App chat-mode" data-testid="app-container">
       {/* Sidebar */}
       <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <Sparkles size={24} className="logo-icon" />
-            <span>Gerch</span>
-          </div>
+          <h2 className="sidebar-title">Gerch</h2>
           <button
             className="new-chat-btn"
             onClick={createNewConversation}
-            title="New Search"
+            title="New Chat"
           >
-            <Plus size={18} />
-            <span>New Search</span>
+            <Plus size={20} />
+            <span>New Chat</span>
           </button>
         </div>
 
@@ -461,18 +420,12 @@ function App() {
             />
             <span>Typing Effect</span>
           </label>
-          {mlReady && (
-            <div className="ml-status">
-              <span className="ml-indicator">🧠</span>
-              <span>AI Enhanced</span>
-            </div>
-          )}
         </div>
 
         <div className="conversations-list">
-          <div className="conversations-title">Recent Searches</div>
+          <div className="conversations-title">Recent Conversations</div>
           {conversations.length === 0 ? (
-            <div className="no-conversations">No searches yet</div>
+            <div className="no-conversations">No conversations yet</div>
           ) : (
             conversations.map(conv => (
               <div
@@ -490,9 +443,9 @@ function App() {
                     e.stopPropagation();
                     deleteConversation(conv.id);
                   }}
-                  title="Delete search"
+                  title="Delete conversation"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))
@@ -503,87 +456,42 @@ function App() {
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
-        <header className="chat-header perplexity-header">
-          <div className="header-left">
-            <button
-              className="sidebar-toggle"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              title="Toggle sidebar"
-            >
-              <Menu size={22} />
-            </button>
-            <div className="logo-container">
-              <Sparkles className="logo-star spinning-always" size={32} />
-              <h1 className="logo-title">Gerch</h1>
-            </div>
-          </div>
-          <div className="header-subtitle">AI-Powered Search Engine</div>
+        <header className="chat-header">
+          <button
+            className="sidebar-toggle"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            title="Toggle sidebar"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="logo-title">
+            Gerch
+            <Sparkles className="logo-star" size={28} />
+          </h1>
         </header>
 
         {/* Chat Messages */}
-        <div className="chat-messages perplexity-messages" data-testid="chat-messages">
+        <div className="chat-messages" data-testid="chat-messages">
           {messages.length === 0 && (
-            <div className="welcome-message perplexity-welcome">
-              <Sparkles className="welcome-star" size={64} />
-              <h2>Search Anything</h2>
-              <p>Powered by AI and 10+ integrated data sources including web search, cryptocurrency data, weather, research papers, and more.</p>
-              <div className="feature-badges">
-                <span className="badge">🖼️ Image Generation</span>
-                <span className="badge">📊 Crypto Prices</span>
-                <span className="badge">🌤️ Weather</span>
-                <span className="badge">📚 Research Papers</span>
-                <span className="badge">💻 Code Help</span>
-              </div>
+            <div className="welcome-message">
+              <Sparkles className="welcome-star" size={48} />
+              <h2>Hello! I'm Gerch</h2>
+              <p>Ask me anything - I can search the web, generate images, get crypto prices, show research papers, and much more!</p>
             </div>
           )}
 
           {messages.map((msg, idx) => (
-            <div key={idx} className={`message perplexity-message ${msg.role}`} data-testid={`message-${idx}`}>
-              {msg.role === "user" && (
-                <div className="message-header">
-                  <div className="message-avatar user-avatar">
-                    <span>You</span>
-                  </div>
-                </div>
-              )}
-              
+            <div key={idx} className={`message ${msg.role}`} data-testid={`message-${idx}`}>
               {msg.role === "gerch" && (
-                <div className="message-header">
-                  <div className="message-avatar ai-avatar">
-                    <Sparkles className={isSpinning && idx === messages.length - 1 ? "spinning" : ""} size={20} />
-                  </div>
+                <div className="message-avatar">
+                  <Sparkles className={isSpinning && idx === messages.length - 1 ? "spinning" : ""} size={24} />
                 </div>
               )}
-              
-              <div className="message-content perplexity-content">
+              <div className="message-content">
                 {msg.content && (
                   <div className="message-text" dangerouslySetInnerHTML={{ 
-                    __html: msg.content
-                      .replace(/\n/g, '<br/>')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                    __html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
                   }} />
-                )}
-                
-                {msg.sources && msg.sources.length > 0 && (
-                  <div className="sources-container">
-                    <div className="sources-title">Sources:</div>
-                    <div className="sources-list">
-                      {msg.sources.slice(0, 3).map((source, i) => (
-                        <a
-                          key={i}
-                          href={source.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="source-link"
-                        >
-                          <span className="source-number">{i + 1}</span>
-                          <span className="source-domain">{new URL(source.link).hostname}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
                 )}
                 
                 {msg.images && (
@@ -599,12 +507,9 @@ function App() {
                 {msg.links && (
                   <div className="links-list">
                     {msg.links.slice(0, 5).map((link, i) => (
-                      <div key={i} className="link-item perplexity-link">
+                      <div key={i} className="link-item">
                         <a href={link.link} target="_blank" rel="noopener noreferrer">
-                          <div className="link-header">
-                            <div className="link-number">{i + 1}</div>
-                            <div className="link-title">{link.title}</div>
-                          </div>
+                          <div className="link-title">{link.title}</div>
                           <div className="link-url">{new URL(link.link).hostname}</div>
                           <div className="link-snippet">{link.snippet}</div>
                         </a>
@@ -614,7 +519,7 @@ function App() {
                 )}
                 
                 {msg.data && (msg.data.images?.length > 0 || msg.data.web_results?.length > 0) && (
-                  <div className="action-buttons perplexity-actions">
+                  <div className="action-buttons">
                     {msg.data.images?.length > 0 && (
                       <button 
                         className="action-btn"
@@ -628,40 +533,39 @@ function App() {
                         className="action-btn"
                         onClick={() => showLinks(msg.data)}
                       >
-                        Show More Sources
+                        Show Articles
                       </button>
                     )}
                   </div>
                 )}
               </div>
               
-              {msg.role !== "user" && (
-                <div className="message-actions perplexity-actions">
-                  <button
-                    className="message-action-btn"
-                    onClick={() => copyMessage(msg.content)}
-                    title="Copy"
-                  >
-                    <Copy size={14} />
-                  </button>
-                  <button
-                    className="message-action-btn"
-                    onClick={() => handleSend()}
-                    title="Regenerate"
-                  >
-                    <RefreshCw size={14} />
-                  </button>
-                </div>
-              )}
+              {/* Message actions */}
+              <div className="message-actions">
+                <button
+                  className="message-action-btn"
+                  onClick={() => copyMessage(msg.content)}
+                  title="Copy message"
+                >
+                  <Copy size={16} />
+                </button>
+                <button
+                  className="message-action-btn delete"
+                  onClick={() => deleteMessage(idx)}
+                  title="Delete message"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+              
+              {msg.role === "user" && <div className="message-avatar user-avatar">You</div>}
             </div>
           ))}
 
           {isTyping && typingText && (
-            <div className="message perplexity-message gerch">
-              <div className="message-header">
-                <div className="message-avatar ai-avatar">
-                  <Sparkles className="spinning" size={20} />
-                </div>
+            <div className="message gerch">
+              <div className="message-avatar">
+                <Sparkles className="spinning" size={24} />
               </div>
               <div className="message-content">
                 <div className="message-text typing">{typingText}<span className="cursor">|</span></div>
@@ -670,11 +574,9 @@ function App() {
           )}
 
           {isTyping && !typingText && (
-            <div className="message perplexity-message gerch">
-              <div className="message-header">
-                <div className="message-avatar ai-avatar">
-                  <Sparkles className="spinning" size={20} />
-                </div>
+            <div className="message gerch">
+              <div className="message-avatar">
+                <Sparkles className="spinning" size={24} />
               </div>
               <div className="message-content">
                 <div className="typing-indicator">
@@ -686,39 +588,18 @@ function App() {
             </div>
           )}
 
-          {/* Related Questions */}
-          {relatedQuestions.length > 0 && !isTyping && (
-            <div className="related-questions">
-              <div className="related-title">
-                <Lightbulb size={16} />
-                <span>Related Questions</span>
-              </div>
-              <div className="related-list">
-                {relatedQuestions.map((question, idx) => (
-                  <button
-                    key={idx}
-                    className="related-question"
-                    onClick={() => handleRelatedQuestion(question)}
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <div className="chat-input-container perplexity-input">
+        <div className="chat-input-container">
           <div className="chat-input-wrapper">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask anything..."
+              placeholder="Ask Gerch anything..."
               className="chat-input"
               data-testid="chat-input"
               disabled={isTyping}
@@ -726,7 +607,7 @@ function App() {
             <button
               onClick={handleSend}
               disabled={!inputValue.trim() || isTyping}
-              className="send-button perplexity-send"
+              className="send-button"
               data-testid="send-button"
             >
               <Send size={20} />
