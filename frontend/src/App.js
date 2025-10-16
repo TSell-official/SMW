@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "@/App.css";
-import { Send, Sparkles, Menu, Plus, Copy, Trash2, RefreshCw, Lightbulb } from "lucide-react";
+import { Send, Sparkles, Plus, X, Copy, RotateCw } from "lucide-react";
 import axios from "axios";
 import { enhanceQuery, generateRelatedQuestions, initializeModel } from './services/mlService';
 
@@ -9,34 +9,36 @@ const API = `${BACKEND_URL}/api`;
 
 function App() {
   // State management
+  const [tabs, setTabs] = useState([{ id: 1, title: 'New Search', messages: [], history: [], active: true }]);
+  const [activeTabId, setActiveTabId] = useState(1);
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [conversations, setConversations] = useState([]);
-  const [currentConversationId, setCurrentConversationId] = useState(null);
-  const [conversationHistory, setConversationHistory] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [typingEffectEnabled, setTypingEffectEnabled] = useState(true);
   const [typingText, setTypingText] = useState("");
   const [relatedQuestions, setRelatedQuestions] = useState([]);
   const [mlReady, setMlReady] = useState(false);
+  const [nextTabId, setNextTabId] = useState(2);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
-  // Initialize ML model on mount (lazy load)
+  // Get active tab
+  const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+  const messages = activeTab?.messages || [];
+  const conversationHistory = activeTab?.history || [];
+
+  // Initialize ML model
   useEffect(() => {
     const loadModel = async () => {
       try {
         await initializeModel();
         setMlReady(true);
-        console.log('🧠 ML capabilities enabled');
+        console.log('🧠 ML ready');
       } catch (error) {
-        console.log('⚠️ ML not available, using fallback mode');
+        console.log('⚠️ ML not available');
         setMlReady(false);
       }
     };
-    
-    // Load model after a short delay to prioritize UI
     setTimeout(loadModel, 1000);
   }, []);
 
@@ -47,145 +49,89 @@ function App() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, typingText]);
+  }, [messages, typingText, activeTabId]);
 
-  // Load data from localStorage on mount
+  // Load from localStorage
   useEffect(() => {
-    loadFromLocalStorage();
-  }, []);
-
-  // Save to localStorage whenever conversations change
-  useEffect(() => {
-    saveToLocalStorage();
-  }, [conversations, typingEffectEnabled]);
-
-  const loadFromLocalStorage = () => {
     try {
-      const savedConversations = localStorage.getItem('gerchConversations');
+      const savedTabs = localStorage.getItem('gerchTabs');
       const savedTypingEffect = localStorage.getItem('gerchTypingEffect');
-      const savedCurrentId = localStorage.getItem('gerchCurrentConversationId');
+      const savedActiveId = localStorage.getItem('gerchActiveTabId');
 
-      if (savedConversations) {
-        const parsedConversations = JSON.parse(savedConversations);
-        setConversations(parsedConversations);
-
-        if (savedCurrentId) {
-          const currentConv = parsedConversations.find(c => c.id === parseInt(savedCurrentId));
-          if (currentConv) {
-            setCurrentConversationId(currentConv.id);
-            setMessages(currentConv.messages);
-            setConversationHistory(currentConv.history || []);
-          } else {
-            createNewConversation();
-          }
-        } else if (parsedConversations.length > 0) {
-          const latestConv = parsedConversations[0];
-          setCurrentConversationId(latestConv.id);
-          setMessages(latestConv.messages);
-          setConversationHistory(latestConv.history || []);
-        } else {
-          createNewConversation();
+      if (savedTabs) {
+        const parsedTabs = JSON.parse(savedTabs);
+        setTabs(parsedTabs);
+        if (savedActiveId) {
+          setActiveTabId(parseInt(savedActiveId));
         }
-      } else {
-        createNewConversation();
+        const maxId = Math.max(...parsedTabs.map(t => t.id));
+        setNextTabId(maxId + 1);
       }
 
       if (savedTypingEffect !== null) {
         setTypingEffectEnabled(savedTypingEffect === 'true');
       }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
-      createNewConversation();
+      console.error('Error loading:', error);
     }
-  };
+  }, []);
 
-  const saveToLocalStorage = () => {
+  // Save to localStorage
+  useEffect(() => {
     try {
-      localStorage.setItem('gerchConversations', JSON.stringify(conversations));
+      localStorage.setItem('gerchTabs', JSON.stringify(tabs));
       localStorage.setItem('gerchTypingEffect', typingEffectEnabled.toString());
-      if (currentConversationId) {
-        localStorage.setItem('gerchCurrentConversationId', currentConversationId.toString());
-      }
+      localStorage.setItem('gerchActiveTabId', activeTabId.toString());
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('Error saving:', error);
     }
-  };
+  }, [tabs, typingEffectEnabled, activeTabId]);
 
-  const createNewConversation = () => {
-    const newConv = {
-      id: Date.now(),
+  // Create new tab
+  const createNewTab = () => {
+    const newTab = {
+      id: nextTabId,
       title: 'New Search',
       messages: [],
       history: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      active: true
     };
-
-    setConversations(prev => [newConv, ...prev].slice(0, 50));
-    setCurrentConversationId(newConv.id);
-    setMessages([]);
-    setConversationHistory([]);
+    setTabs(prev => prev.map(t => ({ ...t, active: false })).concat(newTab));
+    setActiveTabId(nextTabId);
+    setNextTabId(nextTabId + 1);
     setRelatedQuestions([]);
+    // Focus input after creating new tab
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
-  const loadConversation = (convId) => {
-    const conv = conversations.find(c => c.id === convId);
-    if (conv) {
-      setCurrentConversationId(conv.id);
-      setMessages(conv.messages);
-      setConversationHistory(conv.history || []);
-      setIsSidebarOpen(false);
-    }
+  // Switch tab
+  const switchTab = (tabId) => {
+    setActiveTabId(tabId);
+    setTabs(prev => prev.map(t => ({ ...t, active: t.id === tabId })));
   };
 
-  const deleteConversation = (convId) => {
-    setConversations(prev => prev.filter(c => c.id !== convId));
+  // Close tab
+  const closeTab = (tabId, e) => {
+    e.stopPropagation();
+    const filteredTabs = tabs.filter(t => t.id !== tabId);
     
-    if (currentConversationId === convId) {
-      const remaining = conversations.filter(c => c.id !== convId);
-      if (remaining.length > 0) {
-        loadConversation(remaining[0].id);
-      } else {
-        createNewConversation();
-      }
+    if (filteredTabs.length === 0) {
+      createNewTab();
+      return;
     }
+
+    if (tabId === activeTabId) {
+      const currentIndex = tabs.findIndex(t => t.id === tabId);
+      const newActiveTab = filteredTabs[Math.max(0, currentIndex - 1)];
+      setActiveTabId(newActiveTab.id);
+    }
+
+    setTabs(filteredTabs);
   };
 
-  const updateCurrentConversation = (newMessages, newHistory) => {
-    setConversations(prev => {
-      return prev.map(conv => {
-        if (conv.id === currentConversationId) {
-          let title = conv.title;
-          if (title === 'New Search' && newMessages.length > 0) {
-            const firstUserMsg = newMessages.find(m => m.role === 'user');
-            if (firstUserMsg) {
-              title = firstUserMsg.content.length > 40 
-                ? firstUserMsg.content.substring(0, 40) + '...' 
-                : firstUserMsg.content;
-            }
-          }
-
-          return {
-            ...conv,
-            title,
-            messages: newMessages,
-            history: newHistory,
-            updatedAt: new Date().toISOString()
-          };
-        }
-        return conv;
-      });
-    });
-  };
-
-  const copyMessage = (text) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  const deleteMessage = (index) => {
-    const newMessages = messages.filter((_, i) => i !== index);
-    setMessages(newMessages);
-    updateCurrentConversation(newMessages, conversationHistory);
+  // Update tab
+  const updateTab = (tabId, updates) => {
+    setTabs(prev => prev.map(t => t.id === tabId ? { ...t, ...updates } : t));
   };
 
   const countSentences = (text) => {
@@ -214,7 +160,7 @@ function App() {
   };
 
   const handleSend = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isTyping) return;
 
     const userQuery = inputValue;
     const userMessage = {
@@ -224,29 +170,30 @@ function App() {
     };
 
     const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    const newHistory = [...conversationHistory, { role: "user", content: userQuery }];
     
-    const historyMessage = { role: "user", content: userQuery };
-    const newHistory = [...conversationHistory, historyMessage];
-    setConversationHistory(newHistory);
+    updateTab(activeTabId, { 
+      messages: newMessages, 
+      history: newHistory,
+      title: messages.length === 0 ? (userQuery.length > 30 ? userQuery.substring(0, 30) + '...' : userQuery) : activeTab.title
+    });
     
     setInputValue("");
     setIsTyping(true);
     setIsSpinning(true);
 
     try {
-      // Enhance query with ML if available
+      // Enhance query with ML
       let queryIntent = null;
       if (mlReady) {
         try {
           queryIntent = await enhanceQuery(userQuery);
-          console.log('🎯 Query intent:', queryIntent);
         } catch (error) {
-          console.log('ML enhancement failed, using fallback');
+          console.log('ML enhancement failed');
         }
       }
 
-      // Call backend API
+      // Call backend
       const response = await axios.post(`${API}/chat`, {
         message: userQuery,
         conversation_history: conversationHistory
@@ -257,127 +204,58 @@ function App() {
       const searchData = response.data.search_data;
       
       // Generate related questions
-      if (mlReady) {
+      if (mlReady && !userQuery.toLowerCase().includes('generate image')) {
         try {
           const related = await generateRelatedQuestions(userQuery, text);
           setRelatedQuestions(related);
         } catch (error) {
-          console.log('Failed to generate related questions');
+          setRelatedQuestions([]);
         }
+      } else {
+        setRelatedQuestions([]);
       }
 
       const sentenceCount = countSentences(text);
 
-      if (sentenceCount <= 3 && typingEffectEnabled) {
-        typeText(text, () => {
-          const gerchMessage = {
-            role: "gerch",
-            content: text,
-            sources: searchData?.web_results || [],
-            timestamp: new Date().toISOString(),
-            queryIntent: queryIntent
-          };
-          const updatedMessages = [...newMessages, gerchMessage];
-          setMessages(updatedMessages);
-          
-          const updatedHistory = [...newHistory, { role: "assistant", content: text }];
-          setConversationHistory(updatedHistory);
-          
-          setTypingText("");
-          updateCurrentConversation(updatedMessages, updatedHistory);
-          
-          if (needsSearch && searchData) {
-            const hasImages = searchData.images && searchData.images.length > 0;
-            const hasLinks = searchData.web_results && searchData.web_results.length > 0;
-            
-            if (hasImages || hasLinks) {
-              setTimeout(() => {
-                let followUp = "Would you like me to show you ";
-                const options = [];
-                if (hasImages) options.push("images");
-                if (hasLinks) options.push("more sources");
-                followUp += options.join(" or ") + "?";
-                
-                const followUpMessage = {
-                  role: "gerch",
-                  content: followUp,
-                  data: searchData,
-                  timestamp: new Date().toISOString()
-                };
-                const finalMessages = [...updatedMessages, followUpMessage];
-                setMessages(finalMessages);
-                updateCurrentConversation(finalMessages, updatedHistory);
-                setIsTyping(false);
-                setIsSpinning(false);
-              }, 500);
-            } else {
-              setIsTyping(false);
-              setIsSpinning(false);
-            }
-          } else {
-            setIsTyping(false);
-            setIsSpinning(false);
-          }
-        });
-      } else {
+      const processResponse = () => {
         const gerchMessage = {
           role: "gerch",
           content: text,
-          sources: searchData?.web_results || [],
+          articles: searchData?.web_results || [],
+          images: searchData?.images || [],
           timestamp: new Date().toISOString(),
           queryIntent: queryIntent
         };
+        
         const updatedMessages = [...newMessages, gerchMessage];
-        setMessages(updatedMessages);
-        
         const updatedHistory = [...newHistory, { role: "assistant", content: text }];
-        setConversationHistory(updatedHistory);
         
-        updateCurrentConversation(updatedMessages, updatedHistory);
+        updateTab(activeTabId, { 
+          messages: updatedMessages, 
+          history: updatedHistory 
+        });
         
-        if (needsSearch && searchData) {
-          const hasImages = searchData.images && searchData.images.length > 0;
-          const hasLinks = searchData.web_results && searchData.web_results.length > 0;
-          
-          if (hasImages || hasLinks) {
-            setTimeout(() => {
-              let followUp = "Would you like me to show you ";
-              const options = [];
-              if (hasImages) options.push("images");
-              if (hasLinks) options.push("more sources");
-              followUp += options.join(" or ") + "?";
-              
-              const followUpMessage = {
-                role: "gerch",
-                content: followUp,
-                data: searchData,
-                timestamp: new Date().toISOString()
-              };
-              const finalMessages = [...updatedMessages, followUpMessage];
-              setMessages(finalMessages);
-              updateCurrentConversation(finalMessages, updatedHistory);
-              setIsTyping(false);
-              setIsSpinning(false);
-            }, 500);
-          } else {
-            setIsTyping(false);
-            setIsSpinning(false);
-          }
-        } else {
-          setIsTyping(false);
-          setIsSpinning(false);
-        }
+        setTypingText("");
+        setIsTyping(false);
+        setIsSpinning(false);
+      };
+
+      if (sentenceCount <= 3 && typingEffectEnabled) {
+        typeText(text, processResponse);
+      } else {
+        processResponse();
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error('Error:', error);
       const errorMessage = {
         role: "gerch",
         content: "I apologize, but I encountered an error. Please try again.",
         timestamp: new Date().toISOString()
       };
-      const updatedMessages = [...newMessages, errorMessage];
-      setMessages(updatedMessages);
-      updateCurrentConversation(updatedMessages, conversationHistory);
+      updateTab(activeTabId, { 
+        messages: [...newMessages, errorMessage],
+        history: newHistory
+      });
       setIsTyping(false);
       setIsSpinning(false);
     }
@@ -392,347 +270,213 @@ function App() {
 
   const handleRelatedQuestion = (question) => {
     setInputValue(question);
+    inputRef.current?.focus();
   };
 
-  const showImages = (data) => {
-    if (data.images && data.images.length > 0) {
-      const imagesMessage = {
-        role: "gerch",
-        content: "",
-        images: data.images,
-        timestamp: new Date().toISOString()
-      };
-      const updatedMessages = [...messages, imagesMessage];
-      setMessages(updatedMessages);
-      updateCurrentConversation(updatedMessages, conversationHistory);
-    }
-  };
-
-  const showLinks = (data) => {
-    if (data.web_results && data.web_results.length > 0) {
-      const linksMessage = {
-        role: "gerch",
-        content: "",
-        links: data.web_results,
-        timestamp: new Date().toISOString()
-      };
-      const updatedMessages = [...messages, linksMessage];
-      setMessages(updatedMessages);
-      updateCurrentConversation(updatedMessages, conversationHistory);
-    }
-  };
-
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return date.toLocaleDateString();
+  const copyMessage = (text) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
-    <div className="App perplexity-mode" data-testid="app-container">
-      {/* Sidebar */}
-      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <Sparkles size={24} className="logo-icon" />
-            <span>Gerch</span>
-          </div>
-          <button
-            className="new-chat-btn"
-            onClick={createNewConversation}
-            title="New Search"
-          >
-            <Plus size={18} />
-            <span>New Search</span>
-          </button>
-        </div>
-
-        <div className="sidebar-settings">
-          <label className="typing-toggle">
-            <input
-              type="checkbox"
-              checked={typingEffectEnabled}
-              onChange={(e) => setTypingEffectEnabled(e.target.checked)}
-            />
-            <span>Typing Effect</span>
-          </label>
-          {mlReady && (
-            <div className="ml-status">
-              <span className="ml-indicator">🧠</span>
-              <span>AI Enhanced</span>
-            </div>
-          )}
-        </div>
-
-        <div className="conversations-list">
-          <div className="conversations-title">Recent Searches</div>
-          {conversations.length === 0 ? (
-            <div className="no-conversations">No searches yet</div>
-          ) : (
-            conversations.map(conv => (
-              <div
-                key={conv.id}
-                className={`conversation-item ${conv.id === currentConversationId ? 'active' : ''}`}
-                onClick={() => loadConversation(conv.id)}
-              >
-                <div className="conversation-content">
-                  <div className="conversation-title">{conv.title}</div>
-                  <div className="conversation-date">{formatDate(conv.updatedAt)}</div>
-                </div>
+    <div className="App google-mode" data-testid="app-container">
+      {/* Browser-style tabs */}
+      <div className="browser-tabs">
+        <div className="tabs-list">
+          {tabs.map(tab => (
+            <div
+              key={tab.id}
+              className={`tab ${tab.id === activeTabId ? 'active' : ''}`}
+              onClick={() => switchTab(tab.id)}
+            >
+              <span className="tab-title">{tab.title}</span>
+              {tabs.length > 1 && (
                 <button
-                  className="conversation-delete"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteConversation(conv.id);
-                  }}
-                  title="Delete search"
+                  className="tab-close"
+                  onClick={(e) => closeTab(tab.id, e)}
+                  title="Close tab"
                 >
-                  <Trash2 size={14} />
+                  <X size={14} />
                 </button>
-              </div>
-            ))
-          )}
+              )}
+            </div>
+          ))}
+          <button className="tab-new" onClick={createNewTab} title="New search">
+            <Plus size={18} />
+          </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="main-content">
-        {/* Header */}
-        <header className="chat-header perplexity-header">
-          <div className="header-left">
-            <button
-              className="sidebar-toggle"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              title="Toggle sidebar"
-            >
-              <Menu size={22} />
-            </button>
-            <div className="logo-container">
-              <Sparkles className="logo-star spinning-always" size={32} />
-              <h1 className="logo-title">Gerch</h1>
-            </div>
+      <div className="main-content google-layout">
+        {/* Google-style Logo */}
+        <div className={`google-header ${messages.length > 0 ? 'compact' : ''}`}>
+          <div className="google-logo">
+            <span className="logo-text">Gerc</span>
+            <Sparkles className="logo-star-inline spinning-always" size={messages.length > 0 ? 24 : 32} />
+            <span className="logo-text">h</span>
           </div>
-          <div className="header-subtitle">AI-Powered Search Engine</div>
-        </header>
-
-        {/* Chat Messages */}
-        <div className="chat-messages perplexity-messages" data-testid="chat-messages">
-          {messages.length === 0 && (
-            <div className="welcome-message perplexity-welcome">
-              <Sparkles className="welcome-star" size={64} />
-              <h2>Search Anything</h2>
-              <p>Powered by AI and 10+ integrated data sources including web search, cryptocurrency data, weather, research papers, and more.</p>
-              <div className="feature-badges">
-                <span className="badge">🖼️ Image Generation</span>
-                <span className="badge">📊 Crypto Prices</span>
-                <span className="badge">🌤️ Weather</span>
-                <span className="badge">📚 Research Papers</span>
-                <span className="badge">💻 Code Help</span>
-              </div>
-            </div>
-          )}
-
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`message perplexity-message ${msg.role}`} data-testid={`message-${idx}`}>
-              {msg.role === "user" && (
-                <div className="message-header">
-                  <div className="message-avatar user-avatar">
-                    <span>You</span>
-                  </div>
-                </div>
-              )}
-              
-              {msg.role === "gerch" && (
-                <div className="message-header">
-                  <div className="message-avatar ai-avatar">
-                    <Sparkles className={isSpinning && idx === messages.length - 1 ? "spinning" : ""} size={20} />
-                  </div>
-                </div>
-              )}
-              
-              <div className="message-content perplexity-content">
-                {msg.content && (
-                  <div className="message-text" dangerouslySetInnerHTML={{ 
-                    __html: msg.content
-                      .replace(/\n/g, '<br/>')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-                  }} />
-                )}
-                
-                {msg.sources && msg.sources.length > 0 && (
-                  <div className="sources-container">
-                    <div className="sources-title">Sources:</div>
-                    <div className="sources-list">
-                      {msg.sources.slice(0, 3).map((source, i) => (
-                        <a
-                          key={i}
-                          href={source.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="source-link"
-                        >
-                          <span className="source-number">{i + 1}</span>
-                          <span className="source-domain">{new URL(source.link).hostname}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {msg.images && (
-                  <div className="images-grid">
-                    {msg.images.map((img, i) => (
-                      <div key={i} className="image-item">
-                        <img src={img.url} alt="" loading="lazy" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {msg.links && (
-                  <div className="links-list">
-                    {msg.links.slice(0, 5).map((link, i) => (
-                      <div key={i} className="link-item perplexity-link">
-                        <a href={link.link} target="_blank" rel="noopener noreferrer">
-                          <div className="link-header">
-                            <div className="link-number">{i + 1}</div>
-                            <div className="link-title">{link.title}</div>
-                          </div>
-                          <div className="link-url">{new URL(link.link).hostname}</div>
-                          <div className="link-snippet">{link.snippet}</div>
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {msg.data && (msg.data.images?.length > 0 || msg.data.web_results?.length > 0) && (
-                  <div className="action-buttons perplexity-actions">
-                    {msg.data.images?.length > 0 && (
-                      <button 
-                        className="action-btn"
-                        onClick={() => showImages(msg.data)}
-                      >
-                        Show Images
-                      </button>
-                    )}
-                    {msg.data.web_results?.length > 0 && (
-                      <button 
-                        className="action-btn"
-                        onClick={() => showLinks(msg.data)}
-                      >
-                        Show More Sources
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {msg.role !== "user" && (
-                <div className="message-actions perplexity-actions">
-                  <button
-                    className="message-action-btn"
-                    onClick={() => copyMessage(msg.content)}
-                    title="Copy"
-                  >
-                    <Copy size={14} />
-                  </button>
-                  <button
-                    className="message-action-btn"
-                    onClick={() => handleSend()}
-                    title="Regenerate"
-                  >
-                    <RefreshCw size={14} />
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {isTyping && typingText && (
-            <div className="message perplexity-message gerch">
-              <div className="message-header">
-                <div className="message-avatar ai-avatar">
-                  <Sparkles className="spinning" size={20} />
-                </div>
-              </div>
-              <div className="message-content">
-                <div className="message-text typing">{typingText}<span className="cursor">|</span></div>
-              </div>
-            </div>
-          )}
-
-          {isTyping && !typingText && (
-            <div className="message perplexity-message gerch">
-              <div className="message-header">
-                <div className="message-avatar ai-avatar">
-                  <Sparkles className="spinning" size={20} />
-                </div>
-              </div>
-              <div className="message-content">
-                <div className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Related Questions */}
-          {relatedQuestions.length > 0 && !isTyping && (
-            <div className="related-questions">
-              <div className="related-title">
-                <Lightbulb size={16} />
-                <span>Related Questions</span>
-              </div>
-              <div className="related-list">
-                {relatedQuestions.map((question, idx) => (
-                  <button
-                    key={idx}
-                    className="related-question"
-                    onClick={() => handleRelatedQuestion(question)}
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="chat-input-container perplexity-input">
-          <div className="chat-input-wrapper">
+        {/* Search Input */}
+        <div className={`google-search ${messages.length > 0 ? 'compact' : ''}`}>
+          <div className="search-box">
             <input
+              ref={inputRef}
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask anything..."
-              className="chat-input"
-              data-testid="chat-input"
+              placeholder="Search or ask anything..."
+              className="search-input"
               disabled={isTyping}
+              autoFocus
             />
             <button
               onClick={handleSend}
               disabled={!inputValue.trim() || isTyping}
-              className="send-button perplexity-send"
-              data-testid="send-button"
+              className="search-button"
             >
               <Send size={20} />
             </button>
           </div>
         </div>
+
+        {/* Messages/Results */}
+        {messages.length > 0 && (
+          <div className="search-results" data-testid="search-results">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`result-item ${msg.role}`}>
+                {msg.role === "user" && (
+                  <div className="user-query">
+                    <span className="query-label">You searched:</span>
+                    <span className="query-text">{msg.content}</span>
+                  </div>
+                )}
+                
+                {msg.role === "gerch" && (
+                  <div className="gerch-response">
+                    <div className="response-header">
+                      <Sparkles className={isSpinning && idx === messages.length - 1 ? "spinning" : ""} size={20} />
+                      <span className="response-label">Gerch</span>
+                    </div>
+                    
+                    {msg.content && (
+                      <div className="response-content">
+                        <div 
+                          className="response-text" 
+                          dangerouslySetInnerHTML={{ 
+                            __html: msg.content
+                              .replace(/\n/g, '<br/>')
+                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          }} 
+                        />
+                        
+                        <div className="response-actions">
+                          <button
+                            className="response-action"
+                            onClick={() => copyMessage(msg.content)}
+                            title="Copy"
+                          >
+                            <Copy size={14} />
+                            <span>Copy</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Display Images */}
+                    {msg.images && msg.images.length > 0 && (
+                      <div className="response-images">
+                        {msg.images.map((img, i) => (
+                          <div key={i} className="image-result">
+                            <img src={img.url} alt="" loading="lazy" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Display Articles at Bottom */}
+                    {msg.articles && msg.articles.length > 0 && (
+                      <div className="response-articles">
+                        <div className="articles-header">Related Articles</div>
+                        {msg.articles.slice(0, 5).map((article, i) => (
+                          <a
+                            key={i}
+                            href={article.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="article-card"
+                          >
+                            <div className="article-number">{i + 1}</div>
+                            <div className="article-content">
+                              <div className="article-title">{article.title}</div>
+                              <div className="article-url">{new URL(article.link).hostname}</div>
+                              <div className="article-snippet">{article.snippet}</div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Typing Indicator */}
+            {isTyping && typingText && (
+              <div className="result-item gerch">
+                <div className="gerch-response">
+                  <div className="response-header">
+                    <Sparkles className="spinning" size={20} />
+                    <span className="response-label">Gerch</span>
+                  </div>
+                  <div className="response-content">
+                    <div className="response-text typing">{typingText}<span className="cursor">|</span></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isTyping && !typingText && (
+              <div className="result-item gerch">
+                <div className="gerch-response">
+                  <div className="response-header">
+                    <Sparkles className="spinning" size={20} />
+                    <span className="response-label">Gerch</span>
+                  </div>
+                  <div className="response-content">
+                    <div className="typing-indicator">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Related Questions */}
+            {relatedQuestions.length > 0 && !isTyping && (
+              <div className="related-searches">
+                <div className="related-title">People also ask:</div>
+                <div className="related-list">
+                  {relatedQuestions.map((question, idx) => (
+                    <button
+                      key={idx}
+                      className="related-item"
+                      onClick={() => handleRelatedQuestion(question)}
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </div>
     </div>
   );
