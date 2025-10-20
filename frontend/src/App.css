@@ -346,10 +346,33 @@ body {
 /* Shortcuts Container */
 .shortcuts-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1.5rem;
   padding: 2rem;
   animation: fadeIn 0.5s ease;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #404040 transparent;
+}
+
+.shortcuts-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.shortcuts-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shortcuts-container::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 3px;
+}
+
+.shortcuts-container::-webkit-scrollbar-thumb:hover {
+  background: #505050;
 }
 
 @keyframes fadeIn {
