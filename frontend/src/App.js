@@ -18,32 +18,28 @@ const SHORTCUTS = [
     hideUrl: true
   },
   { 
-    id: 'youtube', 
-    name: 'YouTube', 
-    url: 'https://www.youtube.com/',
-    icon: '▶',
-    color: '#ff0000'
+    id: 'servoc', 
+    name: 'Servoc', 
+    url: 'https://servoc-search-engine-d3o4fcc82vji44a5pp3g.lp.dev/',
+    icon: '🔍',
+    color: '#00ff88',
+    hideUrl: true
   },
   { 
-    id: 'instagram', 
-    name: 'Instagram', 
-    url: 'https://www.instagram.com/',
-    icon: '📷',
-    color: '#e4405f'
+    id: 'blackops', 
+    name: 'BlackOps automation', 
+    url: 'https://blackops-automator-d2qcbks82vjhtjudrp9g.lp.dev/',
+    icon: '⚙️',
+    color: '#ff0066',
+    hideUrl: true
   },
   { 
-    id: 'tiktok', 
-    name: 'TikTok', 
-    url: 'https://www.tiktok.com/en/',
-    icon: '🎵',
-    color: '#00f2ea'
-  },
-  { 
-    id: 'x', 
-    name: 'X', 
-    url: 'https://x.com/?lang=en',
-    icon: '𝕏',
-    color: '#1da1f2'
+    id: 'calculator', 
+    name: 'Calculator', 
+    url: 'https://ai-powered-calculator-web-app-d3pk1f482vjikj7jn420.lp.dev/',
+    icon: '🧮',
+    color: '#4285f4',
+    hideUrl: true
   }
 ];
 
