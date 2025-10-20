@@ -43,9 +43,9 @@ class PollinationsClient:
         return None
     
     def generate_audio_url(self, text: str, voice: str = "alloy") -> str:
-        """Generate audio URL from text"""
+        """Generate audio URL from text using Pollinations.AI TTS"""
         encoded_text = quote(text)
-        return f"{self.audio_base_url}{encoded_text}?voice={voice}"
+        return f"{self.text_base_url}{encoded_text}?model=openai-audio&voice={voice}"
 
 
 class CoinGeckoClient:
