@@ -621,6 +621,44 @@ body {
   transform: translateY(-1px);
 }
 
+
+/* Audio Player */
+.response-audio {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.audio-player {
+  width: 100%;
+  max-width: 500px;
+  height: 40px;
+  outline: none;
+}
+
+.audio-player::-webkit-media-controls-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.audio-player::-webkit-media-controls-play-button,
+.audio-player::-webkit-media-controls-mute-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.audio-player::-webkit-media-controls-timeline {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.audio-player::-webkit-media-controls-current-time-display,
+.audio-player::-webkit-media-controls-time-remaining-display {
+  color: #e8eaed;
+}
+
 /* Images */
 .response-images {
   display: grid;
