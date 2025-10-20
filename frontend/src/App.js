@@ -298,6 +298,7 @@ function App() {
       const text = response.data.response;
       const needsSearch = response.data.needs_search;
       const searchData = response.data.search_data;
+      const audioUrl = response.data.audio_url;
       
       // Generate related questions
       if (mlReady && !userQuery.toLowerCase().includes('generate image')) {
