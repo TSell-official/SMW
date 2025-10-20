@@ -519,6 +519,22 @@ async def handle_ip_query(message: str) -> Optional[Dict]:
     
     return None
 
+
+
+def generate_audio_for_response(text: str, voice: str = "alloy") -> Optional[str]:
+    """Generate audio URL for text using Pollinations.ai"""
+    try:
+        # Limit text length for audio generation (max 500 chars for better performance)
+        if len(text) > 500:
+            text = text[:497] + "..."
+        
+        audio_url = pollinations.generate_audio_url(text, voice)
+        return audio_url
+    except Exception as e:
+        logging.error(f"Audio generation error: {e}")
+        return None
+
+
 async def generate_enhanced_response(message: str, history: List[Dict], search_context: str = None) -> str:
     """Generate enhanced AI response combining Pollinations, Cerebras, and search context"""
     try:
