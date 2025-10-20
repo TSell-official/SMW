@@ -320,6 +320,7 @@ function App() {
           content: text,
           articles: searchData?.web_results || [],
           images: searchData?.images || [],
+          audioUrl: audioUrl,
           timestamp: new Date().toISOString(),
           queryIntent: queryIntent
         };
