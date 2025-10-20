@@ -118,7 +118,7 @@ class CalculatorService:
             operand = self.evaluate_node(node.operand)
             return self.OPERATORS[type(node.op)](operand)
         else:
-            raise ValueError(f"Unsupported operation")
+            raise ValueError("Unsupported operation")
     
     async def calculate(self, expression: str) -> Dict[str, Any]:
         try:
@@ -716,7 +716,7 @@ async def chat(request: ChatRequest):
         ip_result = await handle_ip_query(request.message)
         if ip_result:
             ip_data = ip_result['data']
-            response_text = f"**IP Information**\n\n"
+            response_text = "**IP Information**\n\n"
             response_text += f"IP: {ip_data.get('ip', 'N/A')}\n"
             response_text += f"Location: {ip_data.get('city', 'N/A')}, {ip_data.get('region', 'N/A')}, {ip_data.get('country', 'N/A')}\n"
             response_text += f"Organization: {ip_data.get('org', 'N/A')}\n"
