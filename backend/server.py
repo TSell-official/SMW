@@ -238,6 +238,7 @@ class ChatResponse(BaseModel):
     response: str
     needs_search: bool = False
     search_data: Optional[SearchResponse] = None
+    audio_url: Optional[str] = None
 
 async def determine_intent(message: str) -> Dict[str, Any]:
     """Determine if message needs search or just conversation"""
