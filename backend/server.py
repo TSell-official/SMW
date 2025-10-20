@@ -634,7 +634,8 @@ async def chat(request: ChatRequest):
                 change = data.get('usd_24h_change', 0)
                 response_text += f"**{coin.capitalize()}**: ${price:,.2f} ({change:+.2f}%)\n"
             
-            return ChatResponse(response=response_text, needs_search=False)
+            audio_url = generate_audio_for_response(response_text)
+            return ChatResponse(response=response_text, needs_search=False, audio_url=audio_url)
         
         arxiv_result = await handle_arxiv_query(request.message)
         if arxiv_result:
