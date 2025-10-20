@@ -772,26 +772,23 @@ async def chat(request: ChatRequest):
             else:
                 response_text = "I found some information, but let me show you what I discovered."
             
-            # Try to enhance with AI if available
+            # Try to enhance with AI using the new enhanced response function
             try:
                 if search_result.calculator_result and not search_result.calculator_result.get("success"):
                     pass  # Keep simple response for calculator
                 elif search_result.dictionary:
                     pass  # Keep simple response for dictionary
                 else:
-                    # Try to use Cerebras for natural response
-                    ai_response = cerebras_client.chat.completions.create(
-                        model="llama3.1-8b",
-                        messages=[
-                            {"role": "system", "content": "You are Gerch. Provide a brief, natural response based on the search context. Be conversational."},
-                            {"role": "user", "content": f"User asked: {request.message}\n\nContext: {response_text[:500]}\n\nProvide a natural 2-3 sentence response."}
-                        ],
-                        max_tokens=200,
-                        temperature=0.7
+                    # Use enhanced response with search context
+                    enhanced_response = await generate_enhanced_response(
+                        request.message, 
+                        request.conversation_history, 
+                        response_text
                     )
-                    response_text = ai_response.choices[0].message.content
+                    if enhanced_response:
+                        response_text = enhanced_response
             except Exception as e:
-                logging.error(f"AI enhancement error: {e}")
+                logging.error(f"Enhanced AI response error: {e}")
                 # Keep the original response_text
             
             return ChatResponse(
