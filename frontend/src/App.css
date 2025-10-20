@@ -826,8 +826,10 @@ body {
   }
   
   .shortcuts-container {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 1rem;
+    padding: 1.5rem;
+    overflow-x: auto;
   }
   
   .shortcut-tile {
