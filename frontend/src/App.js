@@ -568,6 +568,15 @@ function App() {
                           </div>
                         )}
                         
+                        {msg.audioUrl && (
+                          <div className="response-audio">
+                            <audio controls className="audio-player">
+                              <source src={msg.audioUrl} type="audio/mpeg" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </div>
+                        )}
+                        
                         {msg.images && msg.images.length > 0 && (
                           <div className="response-images">
                             {msg.images.map((img, i) => (
