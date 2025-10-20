@@ -10,15 +10,42 @@ logger = logging.getLogger(__name__)
 
 
 class PollinationsClient:
-    """Pollinations.AI - Free image generation"""
+    """Pollinations.AI - Free image, text, and audio generation"""
     
     def __init__(self):
-        self.base_url = "https://image.pollinations.ai/prompt/"
+        self.image_base_url = "https://image.pollinations.ai/prompt/"
+        self.text_base_url = "https://text.pollinations.ai/"
+        self.audio_base_url = "https://audio.pollinations.ai/prompt/"
     
     def generate_image_url(self, prompt: str, width: int = 512, height: int = 512) -> str:
         """Generate image URL from prompt"""
         encoded_prompt = quote(prompt)
-        return f"{self.base_url}{encoded_prompt}?width={width}&height={height}&nologo=true"
+        return f"{self.image_base_url}{encoded_prompt}?width={width}&height={height}&nologo=true"
+    
+    async def generate_text(self, prompt: str, system: str = "You are a helpful AI assistant.", model: str = "openai") -> str:
+        """Generate text using Pollinations.AI"""
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    self.text_base_url,
+                    json={
+                        "messages": [
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "model": model
+                    }
+                )
+                if response.status_code == 200:
+                    return response.text
+        except Exception as e:
+            logger.error(f"Pollinations text generation error: {e}")
+        return None
+    
+    def generate_audio_url(self, text: str, voice: str = "alloy") -> str:
+        """Generate audio URL from text"""
+        encoded_text = quote(text)
+        return f"{self.audio_base_url}{encoded_text}?voice={voice}"
 
 
 class CoinGeckoClient:
