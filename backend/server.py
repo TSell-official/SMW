@@ -518,48 +518,80 @@ async def handle_ip_query(message: str) -> Optional[Dict]:
     
     return None
 
-async def generate_conversational_response(message: str, history: List[Dict[str, str]]) -> str:
-    """Generate conversational response with fallback to rule-based responses"""
+async def generate_enhanced_response(message: str, history: List[Dict], search_context: str = None) -> str:
+    """Generate enhanced AI response combining Pollinations, Cerebras, and search context"""
+    try:
+        # Build system message with search context if available
+        system_content = "You are Gerch, a helpful and conversational AI assistant. Be friendly, concise, and engaging. Provide clear, accurate answers."
+        
+        if search_context:
+            system_content += f"\n\nAdditional context from search: {search_context[:500]}"
+        
+        # Build conversation history
+        messages = [
+            {"role": "system", "content": system_content}
+        ]
+        
+        # Add conversation history
+        for msg in history[-5:]:
+            messages.append(msg)
+        
+        # Add current message
+        messages.append({"role": "user", "content": message})
+        
+        # Try Pollinations.AI text generation first (it's free and fast)
+        try:
+            pollinations_response = await pollinations.generate_text(
+                prompt=message,
+                system=system_content,
+                model="openai"
+            )
+            if pollinations_response:
+                return pollinations_response
+        except Exception as e:
+            logging.error(f"Pollinations text error: {e}")
+        
+        # Fallback to Cerebras
+        try:
+            response = cerebras_client.chat.completions.create(
+                model="llama3.1-8b",
+                messages=messages,
+                max_tokens=500,
+                temperature=0.7
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logging.error(f"Cerebras error: {e}")
+        
+    except Exception as e:
+        logging.error(f"Enhanced response error: {e}")
+    
+    # Final fallback to rule-based response
+    return await generate_fallback_response(message)
+
+
+async def generate_fallback_response(message: str) -> str:
+    """Generate fallback response when all AI services fail"""
     message_lower = message.lower()
     
-    # Greetings
-    greetings = ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening"]
-    if any(greeting in message_lower for greeting in greetings):
-        return "Hello! I'm Gerch, your AI assistant. I'm here to help you search the web, answer questions, do calculations, define words, and much more. What can I help you with today?"
+    if any(greeting in message_lower for greeting in ["hi", "hello", "hey", "greetings"]):
+        return "Hello! I'm Gerch, your AI-powered search assistant. How can I help you today?"
     
-    # How are you
-    if "how are you" in message_lower or "how's it going" in message_lower:
-        return "I'm doing great, thank you for asking! I'm ready to help you with anything you need. Whether it's searching the web, doing calculations, or just having a chat, I'm here for you."
+    if any(word in message_lower for word in ["how are you", "what's up", "how do you do"]):
+        return "I'm doing great, thank you! I'm here to help you search for information, answer questions, and assist with various tasks. What would you like to know?"
     
-    # Thank you
-    if "thank" in message_lower:
-        return "You're very welcome! I'm always happy to help. Feel free to ask me anything else!"
+    if any(word in message_lower for word in ["thank", "thanks", "appreciate"]):
+        return "You're very welcome! Let me know if you need anything else."
     
-    # What can you do / help with
-    if ("what can you" in message_lower or "what do you" in message_lower or "help me with" in message_lower or "your capabilities" in message_lower):
-        return "I can help you with many things! I can search the web for information, show you images, define words, calculate math expressions, provide summaries from Wikipedia, and have natural conversations. Just ask me anything!"
+    if "who are you" in message_lower or "what are you" in message_lower:
+        return "I'm Gerch, an AI-powered search engine and assistant. I can help you find information, answer questions, generate images, get crypto prices, check weather, and much more!"
     
-    # Goodbye
-    if any(word in message_lower for word in ["goodbye", "bye", "see you", "later"]):
-        return "Goodbye! It was nice chatting with you. Come back anytime you need help!"
-    
-    # Try to use Cerebras for other conversations
-    try:
-        response = cerebras_client.chat.completions.create(
-            model="llama3.1-8b",
-            messages=[
-                {"role": "system", "content": "You are Gerch, a helpful and friendly AI assistant. Keep responses concise and natural."},
-                *history[-4:],
-                {"role": "user", "content": message}
-            ],
-            max_tokens=300,
-            temperature=0.8
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        logging.error(f"Cerebras conversation error: {e}")
-        # Fallback response
-        return "I'm here to help! You can ask me to search for information, show you images, define words, calculate math problems, or just chat. What would you like to know?"
+    return "I understand your message. I'm here to help! Could you please provide more details or ask a specific question?"
+
+
+async def generate_conversational_response(message: str, history: List[Dict[str, str]]) -> str:
+    """Legacy function - redirects to enhanced response"""
+    return await generate_enhanced_response(message, history)
 
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
