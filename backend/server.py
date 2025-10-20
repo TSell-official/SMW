@@ -808,10 +808,14 @@ async def chat(request: ChatRequest):
                 logging.error(f"Enhanced AI response error: {e}")
                 # Keep the original response_text
             
+            # Generate audio for the response
+            audio_url = generate_audio_for_response(response_text)
+            
             return ChatResponse(
                 response=response_text,
                 needs_search=True,
-                search_data=search_result
+                search_data=search_result,
+                audio_url=audio_url
             )
     
     except Exception as e:
