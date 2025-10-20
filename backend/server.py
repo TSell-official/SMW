@@ -668,7 +668,8 @@ async def chat(request: ChatRequest):
             response_text += f"Temperature: {temp}°C\n"
             response_text += f"Wind Speed: {windspeed} km/h\n"
             
-            return ChatResponse(response=response_text, needs_search=False)
+            audio_url = generate_audio_for_response(response_text)
+            return ChatResponse(response=response_text, needs_search=False, audio_url=audio_url)
         
         pokemon_result = await handle_pokemon_query(request.message)
         if pokemon_result:
