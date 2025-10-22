@@ -129,6 +129,7 @@ function App() {
       const savedTabs = localStorage.getItem('gerchTabs');
       const savedTypingEffect = localStorage.getItem('gerchTypingEffect');
       const savedActiveId = localStorage.getItem('gerchActiveTabId');
+      const savedTheme = localStorage.getItem('spheremountTheme');
 
       if (savedTabs) {
         const parsedTabs = JSON.parse(savedTabs);
@@ -142,6 +143,11 @@ function App() {
 
       if (savedTypingEffect !== null) {
         setTypingEffectEnabled(savedTypingEffect === 'true');
+      }
+      
+      if (savedTheme) {
+        setCurrentTheme(savedTheme);
+        document.documentElement.setAttribute('data-theme', savedTheme);
       }
     } catch (error) {
       console.error('Error loading:', error);
