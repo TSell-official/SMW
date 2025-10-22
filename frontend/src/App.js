@@ -481,24 +481,7 @@ function App() {
               </div>
             </div>
 
-            {/* Shortcuts - visible only on home */}
-            {showShortcuts && (
-              <div className="shortcuts-container">
-                {SHORTCUTS.map(shortcut => (
-                  <button
-                    key={shortcut.id}
-                    className="shortcut-tile"
-                    onClick={() => openShortcut(shortcut)}
-                    style={{ borderColor: shortcut.color }}
-                  >
-                    <div className="shortcut-tile-icon" style={{ color: shortcut.color }}>
-                      {shortcut.icon}
-                    </div>
-                    <div className="shortcut-tile-name">{shortcut.name}</div>
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Shortcuts removed from homepage - now only in 3x3 grid menu */}
 
             {/* Search Input */}
             <div className={`google-search ${messages.length > 0 ? 'compact' : ''}`}>
