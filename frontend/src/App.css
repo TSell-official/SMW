@@ -339,7 +339,7 @@ body {
 }
 
 .shortcut-dropdown-item {
-  background: #1a1a1a;
+  background: var(--bg-tertiary);
   border: 2px solid transparent;
   border-radius: 12px;
   padding: 1rem;
@@ -353,7 +353,7 @@ body {
 }
 
 .shortcut-dropdown-item:hover {
-  background: #252525;
+  background: var(--bg-hover);
   transform: translateY(-2px);
 }
 
@@ -364,7 +364,7 @@ body {
 .shortcut-dropdown-item .shortcut-name {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #e8eaed;
+  color: var(--text-primary);
   text-align: center;
 }
 
