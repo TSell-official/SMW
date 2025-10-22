@@ -89,6 +89,7 @@ function App() {
   const [nextTabId, setNextTabId] = useState(2);
   const [showShortcutsMenu, setShowShortcutsMenu] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState('dark');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
