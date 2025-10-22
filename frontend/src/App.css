@@ -266,8 +266,8 @@ body {
   position: absolute;
   top: 60px;
   right: 1rem;
-  background: #0a0a0a;
-  border: 1px solid #1a1a1a;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1rem;
   z-index: 100;
