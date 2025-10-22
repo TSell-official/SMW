@@ -465,6 +465,21 @@ function App() {
         <>
           <div className="shortcuts-overlay" onClick={() => setShowShortcutsMenu(false)} />
           <div className="shortcuts-dropdown">
+            <div className="theme-selector">
+              <div className="theme-selector-label">Theme</div>
+              <div className="theme-grid">
+                {['dark', 'light', 'ocean', 'forest', 'sunset', 'purple', 'midnight', 'coffee', 'rose', 'mint'].map(theme => (
+                  <button
+                    key={theme}
+                    className={`theme-option ${currentTheme === theme ? 'active' : ''}`}
+                    onClick={() => changeTheme(theme)}
+                    title={theme.charAt(0).toUpperCase() + theme.slice(1)}
+                  >
+                    <div className={`theme-preview theme-${theme}`}></div>
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="shortcuts-dropdown-grid">
               {SHORTCUTS.map(shortcut => (
                 <button
