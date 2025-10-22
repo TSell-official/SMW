@@ -40,6 +40,38 @@ const SHORTCUTS = [
     icon: '🧮',
     color: '#4285f4',
     hideUrl: true
+  },
+  { 
+    id: 'gerchcloud', 
+    name: 'Gerch Cloud', 
+    url: 'https://gerch-cloud-platform-d3rcpvk82vjloo6ffv2g.lp.dev/api-keys',
+    icon: '☁️',
+    color: '#87ceeb',
+    hideUrl: true
+  },
+  { 
+    id: 'gerchdraw', 
+    name: 'Gerch Draw', 
+    url: 'https://gerch-draw-d3r8kp482vjloo5vf8dg.lp.dev/dashboard',
+    icon: '🖊️',
+    color: '#ff6b9d',
+    hideUrl: true
+  },
+  { 
+    id: 'snap', 
+    name: 'Snap', 
+    url: 'https://ai-vibecoding-assistant-d3r5gls82vjloo5gqgu0.lp.dev/',
+    icon: '𝗦',
+    color: '#9d4edd',
+    hideUrl: true
+  },
+  { 
+    id: 'travelmap', 
+    name: 'Gerch Travel Maps', 
+    url: 'https://proj_d3re44c82vjloo6h283g.lp.dev/',
+    icon: '📍',
+    color: '#f94144',
+    hideUrl: true
   }
 ];
 
