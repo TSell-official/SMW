@@ -138,8 +138,8 @@ body {
 
 /* Browser-style Tabs */
 .browser-tabs {
-  background: #0a0a0a;
-  border-bottom: 1px solid #1a1a1a;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   padding: 0.5rem 0.5rem 0;
   display: flex;
   align-items: flex-end;
