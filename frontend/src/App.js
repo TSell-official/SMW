@@ -227,6 +227,14 @@ function App() {
     setShowShortcutsMenu(false);
   };
 
+  // Change theme
+  const changeTheme = (theme) => {
+    setCurrentTheme(theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('spheremountTheme', theme);
+  };
+
+
   // Close browser
   const closeBrowser = () => {
     updateTab(activeTabId, { 
