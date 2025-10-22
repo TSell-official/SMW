@@ -477,7 +477,7 @@ function App() {
             {/* Google-style Logo */}
             <div className={`google-header ${messages.length > 0 ? 'compact' : ''}`}>
               <div className="google-logo">
-                <span className="logo-text">Gerch</span>
+                <span className="logo-text">SphereMount Workspace</span>
               </div>
             </div>
 
