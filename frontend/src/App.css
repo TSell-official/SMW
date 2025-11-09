@@ -274,15 +274,13 @@ body {
 
 .shortcuts-dropdown {
   position: fixed;
-  top: calc(50% + 270px);
-  right: 2rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1rem;
   z-index: 10000;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-  max-height: calc(100vh - (50% + 290px));
+  max-height: 600px;
   overflow-y: auto;
 }
 
