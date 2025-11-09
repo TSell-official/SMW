@@ -637,7 +637,14 @@ function App() {
       {showShortcutsMenu && (
         <>
           <div className="shortcuts-overlay" onClick={() => setShowShortcutsMenu(false)} />
-          <div className="shortcuts-dropdown">
+          <div 
+            className="shortcuts-dropdown"
+            style={{
+              left: '50%',
+              top: `calc(50% + ${gridPosition.y + 60}px)`,
+              transform: 'translateX(-50%)'
+            }}
+          >
             <div className="theme-selector">
               <div className="theme-selector-label">Theme</div>
               <div className="theme-grid">
