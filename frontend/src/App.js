@@ -106,6 +106,9 @@ function App() {
   const [showShortcutsMenu, setShowShortcutsMenu] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(true);
   const [currentTheme, setCurrentTheme] = useState('dark');
+  const [gridPosition, setGridPosition] = useState({ x: 0, y: 220 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
