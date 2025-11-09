@@ -18,9 +18,9 @@ const SHORTCUTS = [
     hideUrl: true
   },
   { 
-    id: 'servoc', 
-    name: 'Servoc', 
-    url: 'https://servoc-search-engine-d3o4fcc82vji44a5pp3g.lp.dev/',
+    id: 'lane', 
+    name: 'Lane', 
+    url: 'https://lane-unified-ai-search-assistant-d4816js82vjt9pscmsgg.lp.dev/',
     icon: '🔍',
     color: '#00ff88',
     hideUrl: true
@@ -50,19 +50,35 @@ const SHORTCUTS = [
     hideUrl: true
   },
   { 
-    id: 'gerchdraw', 
-    name: 'Gerch Draw', 
-    url: 'https://gerch-draw-d3r8kp482vjloo5vf8dg.lp.dev/dashboard',
-    icon: '🖊️',
+    id: 'lexi', 
+    name: 'Lexi', 
+    url: 'https://lexiai-autonomous-word-processor-d44ugoc82vjgsfv08jc0.lp.dev/',
+    icon: '📄',
     color: '#ff6b9d',
     hideUrl: true
   },
   { 
-    id: 'snap', 
-    name: 'Snap', 
-    url: 'https://ai-vibecoding-assistant-d3r5gls82vjloo5gqgu0.lp.dev/',
-    icon: '𝗦',
+    id: 'copyrush', 
+    name: 'CopyRush', 
+    url: 'https://ai-copywriting-agent-d4240q482vjgsfq2afk0.lp.dev/',
+    icon: '🖊️',
+    color: '#ff9500',
+    hideUrl: true
+  },
+  { 
+    id: 'dualcoach', 
+    name: 'Dual Coach', 
+    url: 'https://ai-dual-coach-platform-d3u44pc82vjkdghq0ag0.lp.dev/',
+    icon: '💪',
     color: '#9d4edd',
+    hideUrl: true
+  },
+  { 
+    id: 'kentutor', 
+    name: 'Ken Tutor', 
+    url: 'https://preview--learnique-ai.lovable.app/',
+    icon: '🧠',
+    color: '#6366f1',
     hideUrl: true
   },
   { 
