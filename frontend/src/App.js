@@ -109,6 +109,8 @@ function App() {
   const [gridPosition, setGridPosition] = useState({ x: 0, y: 220 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [visibleImages, setVisibleImages] = useState({});
+  const [visibleAudio, setVisibleAudio] = useState({});
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
