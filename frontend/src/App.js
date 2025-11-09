@@ -616,11 +616,19 @@ function App() {
         </div>
       </div>
 
-      {/* 3x3 Shortcuts Menu Button - Fixed position */}
+      {/* 3x3 Shortcuts Menu Button - Draggable */}
       <button 
         className="shortcuts-menu-btn"
-        onClick={() => setShowShortcutsMenu(!showShortcutsMenu)}
-        title="Shortcuts"
+        style={{
+          left: '50%',
+          top: `calc(50% + ${gridPosition.y}px)`,
+          transform: 'translateX(-50%)',
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+        onClick={() => !isDragging && setShowShortcutsMenu(!showShortcutsMenu)}
+        onMouseDown={handleDragStart}
+        onTouchStart={handleDragStart}
+        title="Shortcuts (Drag to move)"
       >
         <Grid3x3 size={20} />
       </button>
