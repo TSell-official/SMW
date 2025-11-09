@@ -369,33 +369,6 @@ function App() {
 
     const userQuery = inputValue;
     
-    // Check for app task commands first
-    const appTask = detectAppTask(userQuery);
-    if (appTask) {
-      updateTab(activeTabId, { 
-        browserUrl: appTask.url,
-        title: appTask.app.name,
-        hideUrl: appTask.app.hideUrl
-      });
-      
-      // Add message to chat showing what task was performed
-      const taskMessage = {
-        role: "gerch",
-        content: `Opening ${appTask.app.name} to perform: ${appTask.task}`,
-        timestamp: new Date().toISOString()
-      };
-      
-      updateTab(activeTabId, { 
-        messages: [...messages, 
-          { role: "user", content: userQuery, timestamp: new Date().toISOString() },
-          taskMessage
-        ]
-      });
-      
-      setInputValue("");
-      return;
-    }
-    
     // Check for "Open X" command
     const shortcutCommand = detectOpenCommand(userQuery);
     if (shortcutCommand) {
