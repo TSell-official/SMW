@@ -254,6 +254,57 @@ function App() {
   };
 
 
+  // Drag handlers for grid button
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    setDragStart({ x: clientX - gridPosition.x, y: clientY - gridPosition.y });
+  };
+
+  const handleDrag = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    setGridPosition({
+      x: clientX - dragStart.x,
+      y: clientY - dragStart.y
+    });
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    localStorage.setItem('spheremountGridPosition', JSON.stringify(gridPosition));
+  };
+
+  // Load grid position from localStorage
+  useEffect(() => {
+    const savedPosition = localStorage.getItem('spheremountGridPosition');
+    if (savedPosition) {
+      setGridPosition(JSON.parse(savedPosition));
+    }
+  }, []);
+
+  // Add event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDrag);
+      window.addEventListener('touchend', handleDragEnd);
+      
+      return () => {
+        window.removeEventListener('mousemove', handleDrag);
+        window.removeEventListener('mouseup', handleDragEnd);
+        window.removeEventListener('touchmove', handleDrag);
+        window.removeEventListener('touchend', handleDragEnd);
+      };
+    }
+  }, [isDragging, gridPosition, dragStart]);
+
+
+
   // Close browser
   const closeBrowser = () => {
     updateTab(activeTabId, { 
