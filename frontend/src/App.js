@@ -465,16 +465,16 @@ function App() {
             <Plus size={18} />
           </button>
         </div>
-        
-        {/* 3x3 Shortcuts Menu Button */}
-        <button 
-          className="shortcuts-menu-btn"
-          onClick={() => setShowShortcutsMenu(!showShortcutsMenu)}
-          title="Shortcuts"
-        >
-          <Grid3x3 size={20} />
-        </button>
       </div>
+
+      {/* 3x3 Shortcuts Menu Button - Fixed position */}
+      <button 
+        className="shortcuts-menu-btn"
+        onClick={() => setShowShortcutsMenu(!showShortcutsMenu)}
+        title="Shortcuts"
+      >
+        <Grid3x3 size={20} />
+      </button>
 
       {/* Shortcuts Dropdown Menu */}
       {showShortcutsMenu && (
