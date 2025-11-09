@@ -234,22 +234,28 @@ body {
 
 /* Shortcuts Menu Button */
 .shortcuts-menu-btn {
-  background: none;
-  border: none;
-  color: #9aa0a6;
+  position: fixed;
+  top: calc(50% + 220px);
+  right: 2rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 0.625rem 1rem;
-  border-radius: 8px 8px 0 0;
+  padding: 0.75rem;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  margin-left: auto;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .shortcuts-menu-btn:hover {
-  background: #1a1a1a;
-  color: #e8eaed;
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Shortcuts Dropdown */
