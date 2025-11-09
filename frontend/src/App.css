@@ -269,9 +269,9 @@ body {
 }
 
 .shortcuts-dropdown {
-  position: absolute;
-  top: 60px;
-  right: 1rem;
+  position: fixed;
+  top: calc(50% + 270px);
+  right: 2rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
