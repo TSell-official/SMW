@@ -837,7 +837,8 @@ async def chat(request: ChatRequest):
             return ChatResponse(
                 response=response_text,
                 needs_search=False,
-                audio_url=audio_url
+                audio_url=audio_url,
+                chart_data=chart_data
             )
         
         # If we need to search/use tools (existing logic)
