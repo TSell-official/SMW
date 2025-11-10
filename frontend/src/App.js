@@ -465,6 +465,7 @@ function App() {
           articles: searchData?.web_results || [],
           images: searchData?.images || [],
           audioUrl: audioUrl,
+          chartData: chartData,
           timestamp: new Date().toISOString(),
           queryIntent: queryIntent
         };
