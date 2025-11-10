@@ -3,6 +3,11 @@ import "@/App.css";
 import { Send, Sparkles, Plus, X, Copy, Grid3x3, ArrowLeft, ExternalLink, Maximize2 } from "lucide-react";
 import axios from "axios";
 import { enhanceQuery, generateRelatedQuestions, initializeModel } from './services/mlService';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend);
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
