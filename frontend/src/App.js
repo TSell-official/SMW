@@ -256,6 +256,24 @@ function App() {
   };
 
 
+  // Toggle image visibility for a message
+  const toggleImages = (messageIndex) => {
+    setVisibleImages(prev => ({
+      ...prev,
+      [messageIndex]: !prev[messageIndex]
+    }));
+  };
+
+  // Toggle audio visibility for a message
+  const toggleAudio = (messageIndex) => {
+    setVisibleAudio(prev => ({
+      ...prev,
+      [messageIndex]: !prev[messageIndex]
+    }));
+  };
+
+
+
   // Drag handlers for grid button
   const handleDragStart = (e) => {
     setIsDragging(true);
