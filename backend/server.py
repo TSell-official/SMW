@@ -905,7 +905,8 @@ async def chat(request: ChatRequest):
                 response=response_text,
                 needs_search=True,
                 search_data=search_result,
-                audio_url=audio_url
+                audio_url=audio_url,
+                chart_data=chart_data
             )
     
     except Exception as e:
