@@ -741,6 +741,25 @@ body {
 }
 
 .toggle-media-btn:hover {
+
+
+/* Chart Visualization */
+.response-chart {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.chart-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
   background: var(--bg-hover);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
