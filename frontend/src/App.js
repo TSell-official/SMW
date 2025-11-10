@@ -442,10 +442,11 @@ function App() {
       const needsSearch = response.data.needs_search;
       const searchData = response.data.search_data;
       const audioUrl = response.data.audio_url;
+      const chartData = response.data.chart_data;
       
       // Generate related questions
       if (mlReady && !userQuery.toLowerCase().includes('generate image')) {
-        try {
+        try:
           const related = await generateRelatedQuestions(userQuery, text);
           setRelatedQuestions(related);
         } catch (error) {
