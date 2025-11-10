@@ -765,6 +765,16 @@ function App() {
                           </div>
                         )}
                         
+                        {msg.chartData && (
+                          <div className="response-chart">
+                            <div className="chart-container">
+                              {msg.chartData.type === 'bar' && <Bar data={msg.chartData.data} options={msg.chartData.options} />}
+                              {msg.chartData.type === 'line' && <Line data={msg.chartData.data} options={msg.chartData.options} />}
+                              {msg.chartData.type === 'pie' && <Pie data={msg.chartData.data} options={msg.chartData.options} />}
+                            </div>
+                          </div>
+                        )}
+                        
                         {msg.articles && msg.articles.length > 0 && (
                           <div className="response-articles">
                             <div className="articles-header">Related Articles</div>
