@@ -536,6 +536,87 @@ def generate_audio_for_response(text: str, voice: str = "alloy") -> Optional[str
         return None
 
 
+
+def detect_chart_request(message: str) -> Optional[Dict[str, Any]]:
+    """Detect if user is requesting a chart/graph visualization"""
+    message_lower = message.lower()
+    
+    # Common chart keywords
+    chart_keywords = ['chart', 'graph', 'plot', 'visualize', 'show data', 'bar chart', 'line graph', 'pie chart']
+    
+    if any(keyword in message_lower for keyword in chart_keywords):
+        # Example data extraction - you can enhance this based on your needs
+        if 'sales' in message_lower or 'revenue' in message_lower:
+            return {
+                'type': 'bar',
+                'data': {
+                    'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    'datasets': [{
+                        'label': 'Monthly Sales',
+                        'data': [12000, 19000, 15000, 25000, 22000, 30000],
+                        'backgroundColor': 'rgba(66, 133, 244, 0.6)',
+                        'borderColor': 'rgba(66, 133, 244, 1)',
+                        'borderWidth': 2
+                    }]
+                },
+                'options': {
+                    'responsive': True,
+                    'plugins': {
+                        'legend': {'position': 'top'},
+                        'title': {'display': True, 'text': 'Sales Data'}
+                    }
+                }
+            }
+        elif 'temperature' in message_lower or 'weather' in message_lower:
+            return {
+                'type': 'line',
+                'data': {
+                    'labels': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    'datasets': [{
+                        'label': 'Temperature (°C)',
+                        'data': [15, 18, 20, 22, 19, 17, 16],
+                        'fill': False,
+                        'borderColor': 'rgba(255, 99, 132, 1)',
+                        'tension': 0.4
+                    }]
+                },
+                'options': {
+                    'responsive': True,
+                    'plugins': {
+                        'legend': {'position': 'top'},
+                        'title': {'display': True, 'text': 'Weekly Temperature'}
+                    }
+                }
+            }
+        elif 'distribution' in message_lower or 'breakdown' in message_lower:
+            return {
+                'type': 'pie',
+                'data': {
+                    'labels': ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+                    'datasets': [{
+                        'data': [30, 25, 20, 15, 10],
+                        'backgroundColor': [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        'borderWidth': 1
+                    }]
+                },
+                'options': {
+                    'responsive': True,
+                    'plugins': {
+                        'legend': {'position': 'top'},
+                        'title': {'display': True, 'text': 'Data Distribution'}
+                    }
+                }
+            }
+    
+    return None
+
+
 async def generate_enhanced_response(message: str, history: List[Dict], search_context: str = None) -> str:
     """Generate enhanced AI response combining Pollinations, Cerebras, and search context"""
     try:
