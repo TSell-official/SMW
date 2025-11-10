@@ -446,7 +446,7 @@ function App() {
       
       // Generate related questions
       if (mlReady && !userQuery.toLowerCase().includes('generate image')) {
-        try:
+        try {
           const related = await generateRelatedQuestions(userQuery, text);
           setRelatedQuestions(related);
         } catch (error) {
