@@ -816,23 +816,6 @@ function App() {
                   </div>
                 )}
 
-                {relatedQuestions.length > 0 && !isTyping && (
-                  <div className="related-searches">
-                    <div className="related-title">People also ask:</div>
-                    <div className="related-list">
-                      {relatedQuestions.map((question, idx) => (
-                        <button
-                          key={idx}
-                          className="related-item"
-                          onClick={() => handleRelatedQuestion(question)}
-                        >
-                          {question}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 <div ref={messagesEndRef} />
               </div>
             )}
