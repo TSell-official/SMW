@@ -719,6 +719,34 @@ body {
   gap: 1.5rem;
 }
 
+
+/* Media Toggle Buttons */
+.media-toggle-section {
+  margin: 1rem 0;
+}
+
+.toggle-media-btn {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-media-btn:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
 .response-header {
   display: flex;
   align-items: center;
