@@ -824,6 +824,9 @@ async def chat(request: ChatRequest):
             
             return ChatResponse(response=response_text, needs_search=False)
         
+        # Check for chart/visualization request
+        chart_data = detect_chart_request(request.message)
+        
         # Determine if we need to search
         intent = await determine_intent(request.message)
         
