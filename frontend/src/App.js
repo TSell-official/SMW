@@ -720,21 +720,41 @@ function App() {
                         )}
                         
                         {msg.audioUrl && (
-                          <div className="response-audio">
-                            <audio controls className="audio-player">
-                              <source src={msg.audioUrl} type="audio/mpeg" />
-                              Your browser does not support the audio element.
-                            </audio>
+                          <div className="media-toggle-section">
+                            <button 
+                              className="toggle-media-btn"
+                              onClick={() => toggleAudio(idx)}
+                            >
+                              {visibleAudio[idx] ? '🔇 Hide Audio' : '🔊 Show Audio'}
+                            </button>
+                            {visibleAudio[idx] && (
+                              <div className="response-audio">
+                                <audio controls className="audio-player">
+                                  <source src={msg.audioUrl} type="audio/mpeg" />
+                                  Your browser does not support the audio element.
+                                </audio>
+                              </div>
+                            )}
                           </div>
                         )}
                         
                         {msg.images && msg.images.length > 0 && (
-                          <div className="response-images">
-                            {msg.images.map((img, i) => (
-                              <div key={i} className="image-result">
-                                <img src={img.url} alt="" loading="lazy" />
+                          <div className="media-toggle-section">
+                            <button 
+                              className="toggle-media-btn"
+                              onClick={() => toggleImages(idx)}
+                            >
+                              {visibleImages[idx] ? '🖼️ Hide Images' : '🖼️ Show Images'}
+                            </button>
+                            {visibleImages[idx] && (
+                              <div className="response-images">
+                                {msg.images.map((img, i) => (
+                                  <div key={i} className="image-result">
+                                    <img src={img.url} alt="" loading="lazy" />
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            )}
                           </div>
                         )}
                         
