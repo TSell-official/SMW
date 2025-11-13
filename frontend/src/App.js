@@ -93,6 +93,14 @@ const SHORTCUTS = [
     icon: '📍',
     color: '#f94144',
     hideUrl: true
+  },
+  { 
+    id: 'finchat', 
+    name: 'Finchat', 
+    url: 'https://preview--econo-buddy-ai.lovable.app/',
+    icon: '💰',
+    color: '#ffd700',
+    hideUrl: true
   }
 ];
 
