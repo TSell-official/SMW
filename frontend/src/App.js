@@ -97,7 +97,7 @@ const SHORTCUTS = [
   { 
     id: 'finchat', 
     name: 'Finchat', 
-    url: 'https://preview--econo-buddy-ai.lovable.app/',
+    url: 'https://econo-buddy-ai.lovable.app/',
     icon: '💰',
     color: '#ffd700',
     hideUrl: true
