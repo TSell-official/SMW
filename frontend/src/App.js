@@ -182,6 +182,9 @@ function App() {
       if (savedTheme) {
         setCurrentTheme(savedTheme);
         document.documentElement.setAttribute('data-theme', savedTheme);
+      } else {
+        // Set default theme to dark
+        document.documentElement.setAttribute('data-theme', 'dark');
       }
     } catch (error) {
       console.error('Error loading:', error);
