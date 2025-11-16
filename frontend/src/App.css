@@ -146,6 +146,53 @@ body {
   justify-content: space-between;
 }
 
+
+/* Payment Buttons */
+.payment-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  margin-left: auto;
+}
+
+.donate-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.813rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.donate-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.donate-btn svg {
+  opacity: 0.8;
+}
+
+.request-app-btn {
+  background: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+
+.request-app-btn:hover {
+  background: var(--accent-color) !important;
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+
 .tabs-list {
   display: flex;
   align-items: flex-end;
