@@ -427,6 +427,20 @@ function App() {
 
     const userQuery = inputValue;
     
+    // Check for /donate command
+    if (userQuery.toLowerCase().trim() === '/donate') {
+      setShowDonateModal(true);
+      setInputValue("");
+      return;
+    }
+    
+    // Check for /request command
+    if (userQuery.toLowerCase().trim() === '/request') {
+      setShowRequestModal(true);
+      setInputValue("");
+      return;
+    }
+    
     // Check for "Open X" command
     const shortcutCommand = detectOpenCommand(userQuery);
     if (shortcutCommand) {
