@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -8,12 +9,15 @@ import re
 import ast
 import operator
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
 from serpapi import GoogleSearch
 from cerebras.cloud.sdk import Cerebras
 import httpx
 import asyncio
+import jwt
+import bcrypt
+from datetime import datetime, timedelta
 from api_clients import (
     PollinationsClient, CoinGeckoClient, ArxivClient, StackExchangeClient,
     DuckDuckGoClient, OpenMeteoClient, ProgrammingQuotesClient, IPInfoClient,
