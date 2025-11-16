@@ -421,6 +421,9 @@ class WorkspaceSettings(BaseModel):
     last_opened_app: Optional[str] = None
 
 class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserProfile
 
 
 # ===== AUTHENTICATION FUNCTIONS =====
