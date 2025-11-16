@@ -107,6 +107,23 @@ const SHORTCUTS = [
 ];
 
 function App() {
+  // Authentication
+  const { user, loading: authLoading, logout, isAuthenticated } = useAuth();
+  
+  // Show auth page if not authenticated
+  if (authLoading) {
+    return (
+      <div className="auth-loading">
+        <div className="spinner"></div>
+        <p>Loading SMW...</p>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
+  
   // State management
   const [tabs, setTabs] = useState([{ id: 1, title: 'New Search', messages: [], history: [], active: true, browserUrl: null }]);
   const [activeTabId, setActiveTabId] = useState(1);
@@ -128,6 +145,7 @@ function App() {
   const [visibleAudio, setVisibleAudio] = useState({});
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
