@@ -496,11 +496,6 @@ function App() {
       
       // Process response with query intent
       let queryIntent = null;
-          setRelatedQuestions([]);
-        }
-      } else {
-        setRelatedQuestions([]);
-      }
 
       const sentenceCount = countSentences(text);
 
