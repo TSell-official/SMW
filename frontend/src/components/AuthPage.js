@@ -90,7 +90,7 @@ const AuthPage = () => {
           {error && <div className="auth-error">{error}</div>}
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
+            {loading ? 'Please wait...' : isLogin ? 'Log in' : 'Sign up'}
           </button>
         </form>
 
@@ -102,7 +102,7 @@ const AuthPage = () => {
               setError('');
             }}
           >
-            {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
           </button>
         </div>
       </div>
