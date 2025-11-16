@@ -39,6 +39,15 @@ cerebras_client = Cerebras(api_key=os.environ.get('CEREBRAS_API_KEY'))
 SERPAPI_KEY = os.environ.get('SERPAPI_KEY')
 PIXABAY_API_KEY = os.environ.get('PIXABAY_API_KEY')
 
+# JWT Configuration
+JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key')
+JWT_ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
+JWT_EXPIRATION_HOURS = int(os.environ.get('JWT_EXPIRATION_HOURS', 24))
+
+# Security
+security = HTTPBearer()
+
+
 # Initialize API clients
 pollinations = PollinationsClient()
 coingecko = CoinGeckoClient()
