@@ -627,8 +627,42 @@ function App() {
             </svg>
             <span>Donate</span>
           </button>
+          
+          {/* User Menu Button */}
+          <button 
+            className="user-menu-btn"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            title={user?.username || 'User'}
+          >
+            <User size={16} />
+            <span>{user?.username}</span>
+          </button>
         </div>
       </div>
+      
+      {/* User Menu Dropdown */}
+      {showUserMenu && (
+        <>
+          <div className="user-menu-overlay" onClick={() => setShowUserMenu(false)} />
+          <div className="user-menu-dropdown">
+            <div className="user-menu-header">
+              <div className="user-menu-info">
+                <div className="user-menu-name">{user?.username}</div>
+                <div className="user-menu-email">{user?.email}</div>
+                <div className="user-menu-plan">{user?.plan || 'free'} plan</div>
+              </div>
+            </div>
+            <div className="user-menu-divider"></div>
+            <button className="user-menu-item" onClick={() => {
+              logout();
+              setShowUserMenu(false);
+            }}>
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </>
+      )}
 
       {/* 3x3 Shortcuts Menu Button - Draggable */}
       <button 
