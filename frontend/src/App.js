@@ -156,21 +156,6 @@ function App() {
   const conversationHistory = activeTab?.history || [];
   const browserUrl = activeTab?.browserUrl || null;
 
-  // Initialize ML model
-  useEffect(() => {
-    const loadModel = async () => {
-      try {
-        await initializeModel();
-        setMlReady(true);
-        console.log('🧠 ML ready');
-      } catch (error) {
-        console.log('⚠️ ML not available');
-        setMlReady(false);
-      }
-    };
-    setTimeout(loadModel, 1000);
-  }, []);
-
   // Scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
