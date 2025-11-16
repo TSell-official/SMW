@@ -472,16 +472,6 @@ function App() {
     setIsSpinning(true);
 
     try {
-      // Enhance query with ML
-      let queryIntent = null;
-      if (mlReady) {
-        try {
-          queryIntent = await enhanceQuery(userQuery);
-        } catch (error) {
-          console.log('ML enhancement failed');
-        }
-      }
-
       // Call backend
       const response = await axios.post(`${API}/chat`, {
         message: userQuery,
