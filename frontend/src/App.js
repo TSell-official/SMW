@@ -124,8 +124,13 @@ function App() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [visibleImages, setVisibleImages] = useState({});
   const [visibleAudio, setVisibleAudio] = useState({});
+  const [showDonateModal, setShowDonateModal] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Cash App link
+  const CASH_APP_LINK = "https://cash.app/$Creator616";
 
   // Get active tab
   const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
