@@ -668,6 +668,17 @@ function App() {
                   <span className="shortcut-name">{shortcut.name}</span>
                 </button>
               ))}
+              
+              {/* Request App Button */}
+              <button
+                className="shortcut-dropdown-item request-app-btn"
+                onClick={handleRequestAppClick}
+              >
+                <span className="shortcut-icon" style={{ color: '#4285f4' }}>
+                  ➕
+                </span>
+                <span className="shortcut-name">Request App</span>
+              </button>
             </div>
           </div>
         </>
