@@ -494,12 +494,8 @@ function App() {
       const audioUrl = response.data.audio_url;
       const chartData = response.data.chart_data;
       
-      // Generate related questions
-      if (mlReady && !userQuery.toLowerCase().includes('generate image')) {
-        try {
-          const related = await generateRelatedQuestions(userQuery, text);
-          setRelatedQuestions(related);
-        } catch (error) {
+      // Process response with query intent
+      let queryIntent = null;
           setRelatedQuestions([]);
         }
       } else {
