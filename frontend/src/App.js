@@ -911,6 +911,132 @@ function App() {
           </>
         )}
       </div>
+
+      {/* Donate Modal */}
+      {showDonateModal && (
+        <>
+          <div className="modal-overlay" onClick={() => setShowDonateModal(false)} />
+          <div className="payment-modal">
+            <div className="modal-header">
+              <h2>Support SMW</h2>
+              <button className="modal-close" onClick={() => setShowDonateModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p>Your tips help keep SMW free, public-first, and constantly improving.</p>
+            </div>
+            <div className="modal-actions">
+              <button className="modal-btn modal-btn-secondary" onClick={() => setShowDonateModal(false)}>
+                Cancel
+              </button>
+              <button 
+                className="modal-btn modal-btn-primary" 
+                onClick={() => {
+                  openCashApp();
+                  setShowDonateModal(false);
+                }}
+              >
+                Continue to Cash App
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Request App Modal */}
+      {showRequestModal && (
+        <>
+          <div className="modal-overlay" onClick={() => setShowRequestModal(false)} />
+          <div className="payment-modal request-modal">
+            <div className="modal-header">
+              <h2>Request a Custom App or Feature</h2>
+              <button className="modal-close" onClick={() => setShowRequestModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-content">
+              <p className="modal-intro">Before you pay, please read the terms carefully.</p>
+              
+              <div className="terms-section">
+                <h3>BEFORE YOU PAY — TERMS AGREEMENT</h3>
+                
+                <ul className="terms-list">
+                  <li>You may request a custom app, feature or integration to be built into the ecosystem.</li>
+                  <li><strong>Maximum payment amount allowed: $300.</strong></li>
+                  <li>After paying, you MUST include in the Cash App note:
+                    <ul>
+                      <li>App or feature name</li>
+                      <li>Description and requirements</li>
+                      <li>Your email or X handle</li>
+                      <li>Any examples or references</li>
+                    </ul>
+                  </li>
+                  <li><strong>Delivery time: 1–3 business days</strong> after payment is confirmed.</li>
+                  <li>You get a <strong>1–3 business day review period</strong> once the build is delivered.</li>
+                  <li>During this review window:
+                    <ul>
+                      <li>You may request revisions for free.</li>
+                      <li>After the window closes, you receive <strong>4 "grace edits" per week</strong> (Mon–Sun) at no charge.</li>
+                      <li>If you run out of grace edits, additional changes cost extra due to token and resource usage.</li>
+                    </ul>
+                  </li>
+                  <li>All apps built through requests become part of the SMW ecosystem.
+                    <ul>
+                      <li>Users DO NOT own rights or IP to the apps.</li>
+                      <li>Users receive access, satisfaction, and public credit for contributing ideas.</li>
+                    </ul>
+                  </li>
+                  <li>Unused funds after completed work go toward development and the founder's compensation.</li>
+                </ul>
+              </div>
+
+              <div className="pricing-tiers">
+                <h3>COST TIERS</h3>
+                
+                <div className="tier">
+                  <h4>Tier 1 — Micro Build ($25–$60)</h4>
+                  <p>Small fixes, minor features, simple UI changes, tiny single-function tools</p>
+                </div>
+                
+                <div className="tier">
+                  <h4>Tier 2 — Standard App ($80–$150)</h4>
+                  <p>Basic standalone app, simple chat tools, single-feature AI utilities, one API integration</p>
+                </div>
+                
+                <div className="tier">
+                  <h4>Tier 3 — Advanced App ($160–$250)</h4>
+                  <p>Multi-screen tools, multiple APIs, authentication, storage, workflows, medium complexity</p>
+                </div>
+                
+                <div className="tier">
+                  <h4>Tier 4 — Premium Build ($260–$300)</h4>
+                  <p>Complex multi-step systems, multi-agent tools, multiple integrations, dashboard-level builds</p>
+                </div>
+                
+                <div className="tier addon">
+                  <h4>Fast Lane Upgrade (+$20–$40)</h4>
+                  <p>Pushes your request to the front of the queue with prioritized delivery</p>
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="modal-btn modal-btn-secondary" onClick={() => setShowRequestModal(false)}>
+                Cancel
+              </button>
+              <button 
+                className="modal-btn modal-btn-primary" 
+                onClick={() => {
+                  openCashApp();
+                  setShowRequestModal(false);
+                }}
+              >
+                I Agree — Continue to Cash App
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
