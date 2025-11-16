@@ -778,6 +778,146 @@ async def generate_conversational_response(message: str, history: List[Dict[str,
     """Legacy function - redirects to enhanced response"""
     return await generate_enhanced_response(message, history)
 
+
+# ===== AUTHENTICATION ROUTES =====
+@api_router.post("/auth/signup", response_model=Token)
+async def signup(user_data: UserSignup):
+    """Create new user account"""
+    try:
+        # Check if user exists
+        existing_user = await db.users.find_one({"email": user_data.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Create user
+        user_id = f"user_{datetime.utcnow().timestamp()}"
+        hashed_pw = hash_password(user_data.password)
+        
+        new_user = {
+            "_id": user_id,
+            "email": user_data.email,
+            "username": user_data.username,
+            "password": hashed_pw,
+            "avatar_url": None,
+            "plan": "free",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        await db.users.insert_one(new_user)
+        
+        # Create default workspace settings
+        workspace_settings = {
+            "user_id": user_id,
+            "theme": "dark",
+            "layout": {},
+            "integrations": {},
+            "last_opened_app": None,
+            "created_at": datetime.utcnow().isoformat()
+        }
+        await db.workspace_settings.insert_one(workspace_settings)
+        
+        # Create access token
+        access_token = create_access_token({"sub": user_id})
+        
+        user_profile = UserProfile(
+            id=user_id,
+            email=new_user["email"],
+            username=new_user["username"],
+            avatar_url=new_user["avatar_url"],
+            plan=new_user["plan"],
+            created_at=new_user["created_at"]
+        )
+        
+        return Token(access_token=access_token, user=user_profile)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Signup error: {e}")
+        raise HTTPException(status_code=500, detail="Signup failed")
+
+@api_router.post("/auth/login", response_model=Token)
+async def login(credentials: UserLogin):
+    """Login user"""
+    try:
+        user = await db.users.find_one({"email": credentials.email})
+        
+        if not user or not verify_password(credentials.password, user["password"]):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Create access token
+        access_token = create_access_token({"sub": user["_id"]})
+        
+        user_profile = UserProfile(
+            id=user["_id"],
+            email=user["email"],
+            username=user["username"],
+            avatar_url=user.get("avatar_url"),
+            plan=user.get("plan", "free"),
+            created_at=user["created_at"]
+        )
+        
+        return Token(access_token=access_token, user=user_profile)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+@api_router.get("/auth/me", response_model=UserProfile)
+async def get_me(current_user: Dict = Depends(get_current_user)):
+    """Get current user profile"""
+    return UserProfile(
+        id=current_user["_id"],
+        email=current_user["email"],
+        username=current_user["username"],
+        avatar_url=current_user.get("avatar_url"),
+        plan=current_user.get("plan", "free"),
+        created_at=current_user["created_at"]
+    )
+
+@api_router.get("/workspace/settings")
+async def get_workspace_settings(current_user: Dict = Depends(get_current_user)):
+    """Get user workspace settings"""
+    settings = await db.workspace_settings.find_one({"user_id": current_user["_id"]})
+    if not settings:
+        # Create default settings
+        settings = {
+            "user_id": current_user["_id"],
+            "theme": "dark",
+            "layout": {},
+            "integrations": {},
+            "last_opened_app": None
+        }
+        await db.workspace_settings.insert_one(settings)
+    
+    return {
+        "theme": settings.get("theme", "dark"),
+        "layout": settings.get("layout", {}),
+        "integrations": settings.get("integrations", {}),
+        "last_opened_app": settings.get("last_opened_app")
+    }
+
+@api_router.put("/workspace/settings")
+async def update_workspace_settings(
+    settings: WorkspaceSettings,
+    current_user: Dict = Depends(get_current_user)
+):
+    """Update user workspace settings"""
+    await db.workspace_settings.update_one(
+        {"user_id": current_user["_id"]},
+        {"$set": {
+            "theme": settings.theme,
+            "layout": settings.layout,
+            "integrations": settings.integrations,
+            "last_opened_app": settings.last_opened_app
+        }},
+        upsert=True
+    )
+    return {"message": "Settings updated"}
+
+
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
