@@ -132,7 +132,6 @@ function App() {
   const [typingEffectEnabled, setTypingEffectEnabled] = useState(true);
   const [typingText, setTypingText] = useState("");
   const [relatedQuestions, setRelatedQuestions] = useState([]);
-  const [mlReady, setMlReady] = useState(false);
   const [nextTabId, setNextTabId] = useState(2);
   const [showShortcutsMenu, setShowShortcutsMenu] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(true);
