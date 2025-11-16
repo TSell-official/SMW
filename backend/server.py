@@ -1244,3 +1244,21 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+@app.on_event("startup")
+async def startup_db_indexes():
+    """Create database indexes on startup for performance"""
+    try:
+        # Create index on users.email (unique)
+        await db.users.create_index("email", unique=True)
+        logging.info("✅ Created index on users.email")
+        
+        # Create index on workspace_settings.user_id (unique)
+        await db.workspace_settings.create_index("user_id", unique=True)
+        logging.info("✅ Created index on workspace_settings.user_id")
+        
+        logging.info("✅ Database indexes initialized")
+    except Exception as e:
+        logging.error(f"Index creation error: {e}")
+
