@@ -277,6 +277,23 @@ function App() {
   };
 
 
+  // Handle Cash App opening
+  const openCashApp = () => {
+    window.open(CASH_APP_LINK, '_blank', 'noopener,noreferrer');
+  };
+
+  // Handle donate button click
+  const handleDonateClick = () => {
+    setShowDonateModal(true);
+  };
+
+  // Handle request app button click
+  const handleRequestAppClick = () => {
+    setShowRequestModal(true);
+  };
+
+
+
   // Toggle image visibility for a message
   const toggleImages = (messageIndex) => {
     setVisibleImages(prev => ({
