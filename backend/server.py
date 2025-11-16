@@ -254,6 +254,37 @@ class ChatResponse(BaseModel):
     audio_url: Optional[str] = None
     chart_data: Optional[Dict[str, Any]] = None
 
+
+
+# ===== AUTHENTICATION MODELS =====
+class UserSignup(BaseModel):
+    email: EmailStr
+    password: str
+    username: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserProfile(BaseModel):
+    id: str
+    email: str
+    username: str
+    avatar_url: Optional[str] = None
+    plan: str = "free"
+    created_at: str
+    
+class WorkspaceSettings(BaseModel):
+    theme: str = "dark"
+    layout: Dict[str, Any] = {}
+    integrations: Dict[str, Any] = {}
+    last_opened_app: Optional[str] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserProfile
+
 async def determine_intent(message: str) -> Dict[str, Any]:
     """Determine if message needs search or just conversation"""
     # Keywords that indicate search needs
