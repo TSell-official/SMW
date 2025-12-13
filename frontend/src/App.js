@@ -592,6 +592,18 @@ function App() {
             <span>Donate</span>
           </button>
           
+          {/* Request Button */}
+          <button 
+            className="request-btn"
+            onClick={handleRequestAppClick}
+            title="Request Custom App"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            <span>Request</span>
+          </button>
+          
           {/* User Menu Button */}
           <button 
             className="user-menu-btn"
