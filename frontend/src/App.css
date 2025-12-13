@@ -181,6 +181,34 @@ body {
   opacity: 0.8;
 }
 
+
+/* Request Button in Header */
+.request-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  color: #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.813rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.request-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.request-btn svg {
+  opacity: 0.9;
+}
+
+
 .request-app-btn {
   background: var(--accent-color) !important;
   border-color: var(--accent-color) !important;
