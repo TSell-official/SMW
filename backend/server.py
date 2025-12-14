@@ -1086,11 +1086,11 @@ async def chat(request: ChatRequest):
         # If it's just a conversation
         if not intent["needs_search"]:
             response_text = await generate_conversational_response(request.message, request.conversation_history)
-            audio_url = generate_audio_for_response(response_text)
+            final_response, reasoning = extract_reasoning_summary(response_text)
             return ChatResponse(
-                response=response_text,
+                response=final_response,
                 needs_search=False,
-                audio_url=audio_url,
+                reasoning_summary=reasoning,
                 chart_data=chart_data
             )
         
