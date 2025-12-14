@@ -297,6 +297,16 @@ function App() {
 
 
 
+
+  // Toggle reasoning dropdown for a message
+  const toggleReasoning = (messageIndex) => {
+    setShowReasoningDropdown(prev => ({
+      ...prev,
+      [messageIndex]: !prev[messageIndex]
+    }));
+  };
+
+
   // Toggle image visibility for a message
   const toggleImages = (messageIndex) => {
     setVisibleImages(prev => ({
