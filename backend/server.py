@@ -608,18 +608,21 @@ async def handle_ip_query(message: str) -> Optional[Dict]:
 
 
 
-def generate_audio_for_response(text: str, voice: str = "alloy") -> Optional[str]:
-    """Generate audio URL for text using Pollinations.ai"""
+
+
+def extract_reasoning_summary(response_text: str) -> tuple[str, Optional[str]]:
+    """Extract reasoning summary from response if present"""
     try:
-        # Limit text length for audio generation (max 500 chars for better performance)
-        if len(text) > 500:
-            text = text[:497] + "..."
-        
-        audio_url = pollinations.generate_audio_url(text, voice)
-        return audio_url
+        # Look for reasoning summary section
+        if "REASONING SUMMARY" in response_text:
+            parts = response_text.split("REASONING SUMMARY")
+            final_response = parts[0].replace("FINAL RESPONSE", "").strip()
+            reasoning = parts[1].strip() if len(parts) > 1 else None
+            return final_response, reasoning
+        return response_text, None
     except Exception as e:
-        logging.error(f"Audio generation error: {e}")
-        return None
+        logging.error(f"Extract reasoning error: {e}")
+        return response_text, None
 
 
 
