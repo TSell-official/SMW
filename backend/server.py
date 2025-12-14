@@ -1151,14 +1151,14 @@ async def chat(request: ChatRequest):
                 logging.error(f"Enhanced AI response error: {e}")
                 # Keep the original response_text
             
-            # Generate audio for the response
-            audio_url = generate_audio_for_response(response_text)
+            # Extract reasoning summary from response
+            final_response, reasoning = extract_reasoning_summary(response_text)
             
             return ChatResponse(
-                response=response_text,
+                response=final_response,
                 needs_search=True,
                 search_data=search_result,
-                audio_url=audio_url,
+                reasoning_summary=reasoning,
                 chart_data=chart_data
             )
     
