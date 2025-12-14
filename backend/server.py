@@ -253,8 +253,8 @@ class ChatResponse(BaseModel):
     response: str
     needs_search: bool = False
     search_data: Optional[SearchResponse] = None
-    audio_url: Optional[str] = None
     chart_data: Optional[Dict[str, Any]] = None
+    reasoning_summary: Optional[str] = None
 
 
 
