@@ -140,7 +140,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [visibleImages, setVisibleImages] = useState({});
-  const [visibleAudio, setVisibleAudio] = useState({});
+  const [showReasoningDropdown, setShowReasoningDropdown] = useState({});
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
