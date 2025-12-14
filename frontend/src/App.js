@@ -481,8 +481,8 @@ function App() {
       const text = response.data.response;
       const needsSearch = response.data.needs_search;
       const searchData = response.data.search_data;
-      const audioUrl = response.data.audio_url;
       const chartData = response.data.chart_data;
+      const reasoningSummary = response.data.reasoning_summary;
       
       // Process response with query intent
       let queryIntent = null;
@@ -495,8 +495,8 @@ function App() {
           content: text,
           articles: searchData?.web_results || [],
           images: searchData?.images || [],
-          audioUrl: audioUrl,
           chartData: chartData,
+          reasoningSummary: reasoningSummary,
           timestamp: new Date().toISOString(),
           queryIntent: queryIntent
         };
