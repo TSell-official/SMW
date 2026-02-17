@@ -82,3 +82,7 @@ frontend/node_modules/.cache/default-development/0.pack
 
 # Note: .env files are tracked for Emergent deployment
 # They will be auto-updated with production values during deployment
+-e 
+# Environment files
+*.env
+*.env.*
