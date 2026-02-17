@@ -838,20 +838,20 @@ function App() {
                           </div>
                         )}
                         
-                        {msg.audioUrl && (
-                          <div className="media-toggle-section">
+                        {msg.reasoningSummary && (
+                          <div className="reasoning-section">
                             <button 
-                              className="toggle-media-btn"
-                              onClick={() => toggleAudio(idx)}
+                              className="reasoning-toggle-btn"
+                              onClick={() => toggleReasoning(idx)}
                             >
-                              {visibleAudio[idx] ? '🔇 Hide Audio' : '🔊 Show Audio'}
+                              <span className="reasoning-icon">🧠</span>
+                              <span>{showReasoningDropdown[idx] ? 'Hide Reasoning' : 'Show Reasoning'}</span>
+                              <span className={`reasoning-arrow ${showReasoningDropdown[idx] ? 'open' : ''}`}>▼</span>
                             </button>
-                            {visibleAudio[idx] && (
-                              <div className="response-audio">
-                                <audio controls className="audio-player">
-                                  <source src={msg.audioUrl} type="audio/mpeg" />
-                                  Your browser does not support the audio element.
-                                </audio>
+                            {showReasoningDropdown[idx] && (
+                              <div className="reasoning-content">
+                                <div className="reasoning-label">How this answer was formed:</div>
+                                <div className="reasoning-text">{msg.reasoningSummary}</div>
                               </div>
                             )}
                           </div>
