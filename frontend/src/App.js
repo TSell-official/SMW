@@ -315,14 +315,6 @@ function App() {
     }));
   };
 
-  // Toggle audio visibility for a message
-  const toggleAudio = (messageIndex) => {
-    setVisibleAudio(prev => ({
-      ...prev,
-      [messageIndex]: !prev[messageIndex]
-    }));
-  };
-
 
 
   // Drag handlers for grid button
