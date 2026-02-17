@@ -916,6 +916,83 @@ body {
   color: #ffffff;
 }
 
+
+
+/* Reasoning Section */
+.reasoning-section {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.reasoning-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.reasoning-toggle-btn:hover {
+  background: var(--bg-hover);
+}
+
+.reasoning-icon {
+  font-size: 1.125rem;
+}
+
+.reasoning-arrow {
+  margin-left: auto;
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.reasoning-arrow.open {
+  transform: rotate(180deg);
+}
+
+.reasoning-content {
+  padding: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.reasoning-label {
+  font-size: 0.813rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reasoning-text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.reasoning-text ul,
+.reasoning-text ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.reasoning-text li {
+  margin-bottom: 0.5rem;
+}
+
 /* Gerch Response */
 .gerch-response {
   display: flex;
